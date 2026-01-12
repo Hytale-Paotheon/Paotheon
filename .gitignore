@@ -1,0 +1,10 @@
+local/
+ 
+data/
+.hytale-downloader-credentials.json
+ 
+hytale-downloader/
+hytale-downloader-*.zip
+hytale-downloader-*
+ 
+.DS_Store
