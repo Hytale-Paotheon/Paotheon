@@ -104,7 +104,7 @@ See [`ROADMAP.md`](ROADMAP.md) for details. Highlights:
 ## Documentation
  
 - [`docs/image/`](docs/image/): Image usage & configuration
-- `docs/hytale/`: internal notes (not end-user image docs)
+- [`docs/hytale/`](docs/hytale/): internal notes (not end-user image docs)
  
 ## Contributing & Security
  
