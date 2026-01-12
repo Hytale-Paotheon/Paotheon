@@ -38,6 +38,7 @@ Current limitation:
 | `HYTALE_BIND` | `0.0.0.0:5520` | Bind address for QUIC/UDP. |
 | `HYTALE_AUTH_MODE` | `authenticated` | Authentication mode (`authenticated` or `offline`). |
 | `HYTALE_DISABLE_SENTRY` | `false` | If `true`, passes `--disable-sentry`. |
+| `HYTALE_ACCEPT_EARLY_PLUGINS` | `false` | If `true`, passes `--accept-early-plugins` (acknowledges unsupported early plugins). |
 | `HYTALE_ENABLE_BACKUP` | `false` | If `true`, passes `--backup`. |
 | `HYTALE_BACKUP_DIR` | *(empty)* | Passed as `--backup-dir`. |
 | `HYTALE_BACKUP_FREQUENCY_MINUTES` | *(empty)* | Passed as `--backup-frequency`. |
@@ -75,6 +76,17 @@ services:
   hytale:
     environment:
       HYTALE_DISABLE_SENTRY: "true"
+```
+
+### Accept early plugins (unsupported)
+
+If you want to acknowledge that loading early plugins is unsupported and may cause stability issues:
+
+```yaml
+services:
+  hytale:
+    environment:
+      HYTALE_ACCEPT_EARLY_PLUGINS: "true"
 ```
 
 ### JVM heap tuning

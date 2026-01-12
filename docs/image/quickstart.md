@@ -12,6 +12,8 @@ services:
       - "5520:5520/udp"
     volumes:
       - ./data:/data
+    tty: true
+    stdin_open: true
     restart: unless-stopped
 ```
 
@@ -19,6 +21,22 @@ Start:
 
 ```bash
 docker compose up -d
+```
+
+## Updating
+
+Docker does **not** automatically pull newer versions of `:latest`.
+To update to the newest image:
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
+If you want Compose to always pull when starting:
+
+```bash
+docker compose up -d --pull always
 ```
 
 ## Required files
@@ -112,6 +130,18 @@ In the server console:
 ```text
 /auth login device
 ```
+
+## Server console (interactive)
+
+Attach:
+
+```bash
+docker compose attach hytale
+```
+
+Detach without stopping the server:
+
+- Press `Ctrl-p` then `Ctrl-q`
 
 ## Notes
 

@@ -13,6 +13,7 @@ This roadmap focuses on delivering a **secure, fast, and easy-to-operate** Docke
  
 - Run the Hytale server from a persistent data volume (e.g. `./data:/data`)
 - Clear validation & error messages when server files / `Assets.zip` are missing
+- Optional opt-in runtime download & extraction of server files and `Assets.zip` via the official Hytale Downloader CLI (where supported)
 - Networking defaults:
   - UDP/QUIC on `5520/udp`
   - configurable bind address/port
@@ -20,23 +21,23 @@ This roadmap focuses on delivering a **secure, fast, and easy-to-operate** Docke
   - assets path
   - auth mode (authenticated/offline)
   - disable Sentry flag
+  - accept early plugins acknowledgement flag
   - backup flags (enable/dir/frequency)
   - JVM heap (Xms/Xmx) + extra JVM args
   - extra server args passthrough
-- Run as **non-root** by default and support configurable UID/GID for file permission alignment
-- Graceful shutdown behavior with configurable stop/grace period
-- Basic healthcheck (process-level) with a documented way to disable it
+- Run as **non-root** by default
 - Documentation:
   - Compose quickstart
   - firewall/port-forwarding notes (UDP)
  
-## v0.2 — Operations & upgrades
+## v0.2 — Bugfixes, missing features, and ops UX
  
-- Optional server file download/update via the official Downloader CLI (where supported)
 - Upgrade guidance that reflects strict client/server protocol matching
-- Backup/restore playbook (including “offline” file operations)
-- Timezone configuration for consistent timestamps in logs/backups
 - Troubleshooting commands and diagnostics output (versions, config paths, bind info)
+- Configurable UID/GID for file permission alignment
+- Graceful shutdown behavior with documented stop/grace period
+- Basic healthcheck (process-level) with a documented way to disable it
+- Better developer workflow and contributor ergonomics
  
 ## v0.3 — Observability
  
@@ -45,11 +46,9 @@ This roadmap focuses on delivering a **secure, fast, and easy-to-operate** Docke
   - log management/retention
   - capacity planning notes (view distance, heap sizing)
  
-## v1.0 — Provider-grade features
+## Future (TBD)
  
-- Non-interactive authentication support for hosting providers (session/identity token injection)
-- Safer secret handling patterns (Docker secrets / Kubernetes secrets guidance)
-- Hardening guidance:
-  - read-only root filesystem
-  - capability dropping
-  - seccomp/profile recommendations
+- Provider-grade features (hosting / fleets)
+- Hardening guidance (read-only root filesystem, capability dropping, seccomp/profile recommendations)
+- Kubernetes Helm chart
+- Optional mod/plugin installation automation (e.g. via CurseForge API)

@@ -8,3 +8,6 @@ hytale-downloader-*.zip
 hytale-downloader-*
  
 .DS_Store
+
+.windsurf/
+.claude/

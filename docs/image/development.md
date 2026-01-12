@@ -63,6 +63,20 @@ Notes:
 - Credentials will be stored on the `./data` volume.
 - Auto-download currently works on `linux/amd64` only.
 
+## Server console (interactive)
+
+The Hytale server provides an interactive console while the process is running.
+
+Attach to the console:
+
+```bash
+task dev:attach
+```
+
+Detach without stopping the server:
+
+- Press `Ctrl-p` then `Ctrl-q`
+
 ## Useful variables
 
 You can override these Task vars:

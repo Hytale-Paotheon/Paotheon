@@ -62,7 +62,3 @@ Repository-local planning and scratch work lives in `local/` and is intentionall
 ## Security
  
 For vulnerabilities, see `SECURITY.md`.
- 
-## AI agents
- 
-We use AI agents to accelerate development. Agent instructions live in `AGENTS.md` and `CLAUDE.md`.

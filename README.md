@@ -34,12 +34,24 @@ services:
       - "5520:5520/udp"
     volumes:
       - ./data:/data
+    tty: true
+    stdin_open: true
     restart: unless-stopped
 ```
 
 Start:
 
 ```bash
+docker compose up -d
+```
+
+Update:
+
+Docker does **not** automatically pull a newer `:latest` image.
+To update:
+
+```bash
+docker compose pull
 docker compose up -d
 ```
 
@@ -79,6 +91,18 @@ In the server console:
 ```text
 /auth login device
 ```
+
+## Server console (interactive)
+
+Attach:
+
+```bash
+docker compose attach hytale
+```
+
+Detach without stopping the server:
+
+- Press `Ctrl-p` then `Ctrl-q`
 
 ## Why this image
 
