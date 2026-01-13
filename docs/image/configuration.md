@@ -80,7 +80,7 @@ Advanced (providers / fleets):
 | `JVM_EXTRA_ARGS` | *(empty)* | Extra JVM args appended to the `java` command. |
 | `ENABLE_AOT` | `auto` | `auto\|true\|false\|generate` (controls `-XX:AOTCache=...`). |
 | `EXTRA_SERVER_ARGS` | *(empty)* | Extra server args appended at the end. |
-| `HYTALE_ALLOW_OP` | `false` | If `true`, passes `--allow-op`. |
+| `HYTALE_ALLOW_OP` | `true` | If `true`, enables the `/op` command. |
 | `HYTALE_BACKUP_MAX_COUNT` | *(empty)* | Passed as `--backup-max-count`. |
 | `HYTALE_BARE` | `false` | If `true`, passes `--bare`. |
 | `HYTALE_BOOT_COMMAND` | *(empty)* | Passed as `--boot-command`. |
