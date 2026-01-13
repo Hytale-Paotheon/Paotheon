@@ -9,7 +9,7 @@ This roadmap focuses on delivering a **secure, fast, and easy-to-operate** Docke
 - **Speed**: quick startup, repeatable upgrades, minimal friction
 - **UX**: simple configuration, clear docs, helpful error messages
  
-## v0.1 — MVP (single-server)
+## Current capabilities (single-server)
  
 - Run the Hytale server from a persistent data volume (e.g. `./data:/data`)
 - Clear validation & error messages when server files / `Assets.zip` are missing
@@ -30,25 +30,26 @@ This roadmap focuses on delivering a **secure, fast, and easy-to-operate** Docke
   - Compose quickstart
   - firewall/port-forwarding notes (UDP)
  
-## v0.2 — Bugfixes, missing features, and ops UX
- 
+## Next (operator UX & reliability)
+
 - Upgrade guidance that reflects strict client/server protocol matching
+- Config file interpolation via environment variables (e.g. `CFG_*`), to generate/update config files at startup
 - Troubleshooting commands and diagnostics output (versions, config paths, bind info)
 - Configurable UID/GID for file permission alignment
 - Graceful shutdown behavior with documented stop/grace period
 - Basic healthcheck (process-level) with a documented way to disable it
 - Better developer workflow and contributor ergonomics
- 
-## v0.3 — Observability
- 
+
+## Later (hardening, observability & operational guidance)
+
+- Hardening guidance (read-only root filesystem, capability dropping, seccomp/profile recommendations)
 - Metrics integration guide (Prometheus exporter plugin usage)
 - Operational recommendations:
   - log management/retention
   - capacity planning notes (view distance, heap sizing)
  
-## Future (TBD)
- 
+## Future ideas (TBD)
+
 - Provider-grade features (hosting / fleets)
-- Hardening guidance (read-only root filesystem, capability dropping, seccomp/profile recommendations)
 - Kubernetes Helm chart
 - Optional mod/plugin installation automation (e.g. via CurseForge API)
