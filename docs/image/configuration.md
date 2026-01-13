@@ -15,8 +15,8 @@ If `HYTALE_AUTO_DOWNLOAD=true` and `Assets.zip` / `HytaleServer.jar` are missing
 - extract `Assets.zip` to `/data/Assets.zip`
 - extract `Server/` contents to `/data/server/`
 
-When `HYTALE_AUTO_DOWNLOAD=true`, the container will also check for updates on each start by default.
-You can disable this and only download when files are missing by setting `HYTALE_AUTO_UPDATE=false`.
+When `HYTALE_AUTO_DOWNLOAD=true`, the container will check for updates on each start by comparing the remote version against the locally stored version (in `.hytale-version`).
+Downloads only happen when an update is available. Set `HYTALE_AUTO_UPDATE=false` to disable update checks entirely and only download when files are missing.
 
 Credentials are stored as:
 
@@ -65,7 +65,8 @@ Advanced (providers / fleets):
 | `HYTALE_SERVER_SESSION_TOKEN` | *(empty)* | Passed as `--session-token` (**secret**). |
 | `HYTALE_SERVER_IDENTITY_TOKEN` | *(empty)* | Passed as `--identity-token` (**secret**). |
 | `HYTALE_AUTO_DOWNLOAD` | `false` | If `true`, downloads server files and `Assets.zip` via the official Hytale Downloader when missing. |
-| `HYTALE_AUTO_UPDATE` | `true` | If `true`, runs the downloader on each start when `HYTALE_AUTO_DOWNLOAD=true` (checks for updates even when files already exist). |
+| `HYTALE_AUTO_UPDATE` | `true` | If `true`, checks for updates on each start (compares remote version vs local). Only downloads when an update is available. |
+| `HYTALE_VERSION_FILE` | `/data/.hytale-version` | File where the installed server version is stored (used for update checks). |
 | `HYTALE_DOWNLOADER_URL` | `https://downloader.hytale.com/hytale-downloader.zip` | Official downloader URL (must start with `https://downloader.hytale.com/`). |
 | `HYTALE_DOWNLOADER_DIR` | `/data/.hytale-downloader` | Directory where the image stores the downloader binary. |
 | `HYTALE_DOWNLOADER_PATCHLINE` | *(empty)* | Optional downloader patchline (e.g. `pre-release`). |

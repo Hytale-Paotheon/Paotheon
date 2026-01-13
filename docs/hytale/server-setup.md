@@ -62,11 +62,15 @@ The tool uses OAuth2 Device Code flow and stores credentials locally.
 
 Basic commands (as documented):
 
-- `./hytale-downloader` — download latest release
-- `./hytale-downloader -print-version` — show game version without downloading
-- `./hytale-downloader -download-path /path/to/game.zip` — download to specific file
-- `./hytale-downloader -patchline pre-release` — download a different patchline
-- `./hytale-downloader -skip-update-check` — disable downloader self-update check
+| Command | Description |
+|---------|-------------|
+| `./hytale-downloader` | Download latest release |
+| `./hytale-downloader -print-version` | Show game version without downloading |
+| `./hytale-downloader -version` | Show hytale-downloader version |
+| `./hytale-downloader -check-update` | Check for hytale-downloader updates |
+| `./hytale-downloader -download-path game.zip` | Download to specific file |
+| `./hytale-downloader -patchline pre-release` | Download from pre-release channel |
+| `./hytale-downloader -skip-update-check` | Skip automatic update check |
 
 Troubleshooting highlights:
 

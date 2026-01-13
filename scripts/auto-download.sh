@@ -31,6 +31,7 @@ HYTALE_DOWNLOADER_CREDENTIALS_SRC="${HYTALE_DOWNLOADER_CREDENTIALS_SRC:-}"
 HYTALE_KEEP_GAME_ZIP="${HYTALE_KEEP_GAME_ZIP:-false}"
 HYTALE_DOWNLOAD_LOCK="${HYTALE_DOWNLOAD_LOCK:-true}"
 HYTALE_AUTO_UPDATE="${HYTALE_AUTO_UPDATE:-true}"
+HYTALE_VERSION_FILE="${HYTALE_VERSION_FILE:-${DATA_DIR}/.hytale-version}"
 
 mkdir -p "${SERVER_DIR}"
 mkdir -p "${HYTALE_DOWNLOADER_DIR}"
@@ -86,12 +87,14 @@ else
   log "Auto-download: download lock disabled via HYTALE_DOWNLOAD_LOCK=false"
 fi
 
+server_files_present=0
 if [ -f "${HYTALE_SERVER_JAR}" ] && [ -f "${HYTALE_ASSETS_PATH}" ]; then
+  server_files_present=1
   if ! is_true "${HYTALE_AUTO_UPDATE}"; then
-    log "Auto-download: server files already present; skipping"
+    log "Auto-download: server files already present and HYTALE_AUTO_UPDATE=false; skipping"
     exit 0
   fi
-  log "Auto-download: server files already present; checking for updates"
+  log "Auto-download: server files already present; will check for updates"
 fi
 
 case "${HYTALE_DOWNLOADER_URL}" in
@@ -142,7 +145,6 @@ else
   log "Auto-download: reusing existing downloader binary"
 fi
 
-log "Auto-download: running downloader"
 log "Auto-download: first-time auth may require opening a URL and entering a device code (see logs)"
 
 # Persist downloader credentials on the /data volume by running in DATA_DIR.
@@ -158,6 +160,42 @@ if [ -n "${HYTALE_DOWNLOADER_CREDENTIALS_SRC}" ]; then
   log "Auto-download: seeding downloader credentials from mounted file"
   cp -f "${HYTALE_DOWNLOADER_CREDENTIALS_SRC}" "${DATA_DIR}/.hytale-downloader-credentials.json"
 fi
+
+CREDENTIALS_FILE="${DATA_DIR}/.hytale-downloader-credentials.json"
+
+if [ "${server_files_present}" -eq 1 ]; then
+  if [ ! -f "${CREDENTIALS_FILE}" ]; then
+    log "Auto-download: no credentials found; skipping version check (auth required for first download)"
+  else
+    log "Auto-download: checking remote version"
+    remote_version=""
+    print_version_args="${DOWNLOADER_BIN} -print-version"
+    if [ -n "${HYTALE_DOWNLOADER_PATCHLINE}" ]; then
+      print_version_args="${print_version_args} -patchline ${HYTALE_DOWNLOADER_PATCHLINE}"
+    fi
+    if is_true "${HYTALE_DOWNLOADER_SKIP_UPDATE_CHECK}"; then
+      print_version_args="${print_version_args} -skip-update-check"
+    fi
+    remote_version="$(${print_version_args} 2>&1 || true)"
+
+    if [ -n "${remote_version}" ] && ! printf '%s' "${remote_version}" | grep -qi -e "error" -e "failed" -e "authenticate"; then
+      local_version=""
+      if [ -f "${HYTALE_VERSION_FILE}" ]; then
+        local_version="$(cat "${HYTALE_VERSION_FILE}" 2>/dev/null || true)"
+      fi
+
+      if [ "${remote_version}" = "${local_version}" ]; then
+        log "Auto-download: server is up to date (version: ${local_version})"
+        exit 0
+      fi
+      log "Auto-download: update available (local: ${local_version:-unknown}, remote: ${remote_version})"
+    else
+      log "Auto-download: could not determine remote version; proceeding with download"
+    fi
+  fi
+fi
+
+log "Auto-download: running downloader"
 
 set -- "${DOWNLOADER_BIN}" -download-path "${HYTALE_GAME_ZIP_PATH}"
 
@@ -205,6 +243,20 @@ fi
 
 if ! is_true "${HYTALE_KEEP_GAME_ZIP}"; then
   rm -f "${HYTALE_GAME_ZIP_PATH}" || true
+fi
+
+downloaded_version=""
+print_version_args="${DOWNLOADER_BIN} -print-version"
+if [ -n "${HYTALE_DOWNLOADER_PATCHLINE}" ]; then
+  print_version_args="${print_version_args} -patchline ${HYTALE_DOWNLOADER_PATCHLINE}"
+fi
+if is_true "${HYTALE_DOWNLOADER_SKIP_UPDATE_CHECK}"; then
+  print_version_args="${print_version_args} -skip-update-check"
+fi
+downloaded_version="$(${print_version_args} 2>/dev/null || true)"
+if [ -n "${downloaded_version}" ]; then
+  printf '%s\n' "${downloaded_version}" >"${HYTALE_VERSION_FILE}"
+  log "Auto-download: saved version ${downloaded_version} to ${HYTALE_VERSION_FILE}"
 fi
 
 log "Auto-download: done"
