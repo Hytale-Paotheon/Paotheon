@@ -65,6 +65,9 @@ Downloader credentials are stored on the `/data` volume as:
 
 On subsequent runs, the download flow should be non-interactive.
 
+By default (with `HYTALE_AUTO_DOWNLOAD=true`), the container will also run the downloader on each start to check for updates.
+If you want it to only download when files are missing, set `HYTALE_AUTO_UPDATE=false`.
+
 If you want fully non-interactive automation, you can seed credentials (mount a credentials file read-only):
 
 - See [`configuration.md`](configuration.md#non-interactive-auto-download-seed-credentials)
@@ -142,6 +145,54 @@ This image uses **Adoptium / Eclipse Temurin 25**.
 On first run (with `HYTALE_AUTO_DOWNLOAD=true`), the official downloader prints an authorization URL + device code in the container logs.
 
 Open the URL in your browser and complete the flow.
+
+## Server authentication (required for player connections)
+
+In `HYTALE_AUTH_MODE=authenticated` mode, the server must obtain server session tokens before it can complete the authenticated handshake with clients.
+If you try to connect before the server is authenticated, you may see a disconnect with a message like:
+
+```
+Server authentication unavailable - please try again later
+```
+
+To authenticate, attach to the server console and run:
+
+```text
+/auth login device
+```
+
+Follow the URL + device code shown in the console.
+
+If multiple profiles are available, select one:
+
+```text
+/auth select <number>
+```
+
+You can check status with:
+
+```text
+/auth status
+```
+
+## JVM memory (important)
+
+If you don't set `JVM_XMX`, Java will pick a default heap size based on available container memory.
+For predictable production operation, set at least `JVM_XMX`.
+
+You can optionally set `JVM_XMS` as well. If you see high CPU usage from garbage collection, that can be a symptom of memory pressure and an `JVM_XMX` value that is too low.
+Monitor RAM/CPU usage for your player count and experiment with different values.
+
+Example:
+
+```yaml
+services:
+  hytale:
+    environment:
+      JVM_XMX: "6G"
+```
+
+See also: [`configuration.md`](configuration.md#jvm-heap-tuning)
 
 ## Server console (interactive)
 

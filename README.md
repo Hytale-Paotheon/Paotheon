@@ -63,6 +63,9 @@ Recommended default: automatic download of `Assets.zip` and server files (best U
 - Set `HYTALE_AUTO_DOWNLOAD=true` (already included above)
 - Follow the device-code link shown in logs on first run
 
+When `HYTALE_AUTO_DOWNLOAD=true`, the container will also run the downloader on each start to check for updates by default.
+To disable this and only download when files are missing, set `HYTALE_AUTO_UPDATE=false`.
+
 Auto-download details:
 
 - Downloader source: `https://downloader.hytale.com/hytale-downloader.zip`
@@ -99,6 +102,38 @@ Next:
 When using `HYTALE_AUTO_DOWNLOAD=true`, the official downloader will print an authorization URL + device code in the container logs on first run.
 
 Follow that URL in your browser to authenticate.
+
+## Server authentication (required for player connections)
+
+In `HYTALE_AUTH_MODE=authenticated` mode, the server must be authenticated before players can connect.
+Attach to the server console and run:
+
+```text
+/auth login device
+```
+
+If multiple profiles are shown, pick one via `/auth select <number>`.
+
+For provider-grade automation, see: [`docs/hytale/server-provider-auth.md`](docs/hytale/server-provider-auth.md) (tokens via `HYTALE_SERVER_SESSION_TOKEN` / `HYTALE_SERVER_IDENTITY_TOKEN`).
+
+## JVM memory (important)
+
+If you don't set `JVM_XMX`, Java will pick a default heap size based on available container memory.
+For predictable production operation, set at least `JVM_XMX`.
+
+You can optionally set `JVM_XMS` as well. If you see high CPU usage from garbage collection, that can be a symptom of memory pressure and an `JVM_XMX` value that is too low.
+Monitor RAM/CPU usage for your player count and experiment with different values.
+
+Example:
+
+```yaml
+services:
+  hytale:
+    environment:
+      JVM_XMX: "6G"
+```
+
+See: [`docs/image/configuration.md`](docs/image/configuration.md#jvm-heap-tuning)
 
 ## Server console (interactive)
 

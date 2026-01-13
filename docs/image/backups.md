@@ -34,6 +34,7 @@ services:
 
 - If you change backup paths, ensure the container user can write to them.
 - Backup settings map directly to the server flags (`--backup`, `--backup-dir`, `--backup-frequency`).
+- If `HYTALE_ENABLE_BACKUP=true` and `HYTALE_BACKUP_DIR` is not set, this image defaults the backup directory to `/data/backups`.
 
 ## Related docs
 

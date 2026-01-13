@@ -31,6 +31,14 @@ After first launch, authenticate your server using the server console:
 
 You will receive a URL + device code (valid for 900 seconds). After completing the browser authorization, the server becomes authenticated and can accept player connections.
 
+If multiple profiles are available, the server will ask you to select one:
+
+```text
+/auth select <number>
+```
+
+Troubleshooting: If you see clients disconnect during the authenticated handshake with messages like "Server session token not available", the server is not authenticated yet.
+
 Notes from the official docs:
 
 - Servers require authentication to communicate with Hytale service APIs and to counter abuse.
