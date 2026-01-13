@@ -74,16 +74,7 @@ Auto-download details:
 If you are running Docker on an arm64 host (for example Apple Silicon), you have two options:
 
 - Run the container as `linux/amd64` (Compose: `platform: linux/amd64`)
-- Or set `HYTALE_AUTO_DOWNLOAD=false` and provision files manually (see below)
-
-Manual provisioning (opt-out / no auto-download):
-
-- Set `HYTALE_AUTO_DOWNLOAD=false`
-- Get `Assets.zip` + the `Server/` folder via:
-  - [`docs/image/server-files.md`](docs/image/server-files.md)
-- Create `./data/server/`
-- Put `Assets.zip` at `./data/Assets.zip`
-- Copy the contents of `Server/` into `./data/server/` (at minimum `./data/server/HytaleServer.jar`)
+- Or provision files manually (see: [`docs/image/server-files.md`](docs/image/server-files.md))
 
 Start and check logs if needed:
 
