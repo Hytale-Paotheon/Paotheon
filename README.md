@@ -8,8 +8,8 @@ Brought to you by [Hybrowse](https://hybrowse.gg) and the developer of [setupmc.
 
 ## Image
 
-- **Image (Docker Hub)**: [hybrowse/hytale-server](https://hub.docker.com/r/hybrowse/hytale-server)
-- **Mirror (GHCR)**: [ghcr.io/hybrowse/hytale-server](https://ghcr.io/hybrowse/hytale-server)
+- **Image (Docker Hub)**: [`hybrowse/hytale-server`](https://hub.docker.com/r/hybrowse/hytale-server)
+- **Mirror (GHCR)**: [`ghcr.io/hybrowse/hytale-server`](https://ghcr.io/hybrowse/hytale-server)
 
 ## Community
 
