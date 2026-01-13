@@ -124,7 +124,9 @@ if [ "${missing}" -ne 0 ]; then
   log "- Place the official server files into ${SERVER_DIR}/"
   log "- Place Assets.zip into ${DATA_DIR}/Assets.zip"
   log "- Or set HYTALE_AUTO_DOWNLOAD=true"
+  log "- On Apple Silicon (arm64): auto-download requires running the container as linux/amd64 (Docker Compose: platform: linux/amd64)"
   log "- See https://github.com/Hybrowse/hytale-server-docker/blob/main/docs/image/server-files.md"
+  log "- See https://github.com/Hybrowse/hytale-server-docker/blob/main/docs/image/quickstart.md"
   exit 1
 fi
 
@@ -198,6 +200,8 @@ case "$(lower "${ENABLE_AOT}")" in
       log "- AOT: enabled"
     else
       log "ERROR: ENABLE_AOT=true but AOT cache file does not exist: ${HYTALE_AOT_PATH}"
+      log "ERROR: Generate an AOT cache (ENABLE_AOT=generate) or disable AOT (ENABLE_AOT=false)."
+      log "ERROR: See https://github.com/Hybrowse/hytale-server-docker/blob/main/docs/image/configuration.md"
       exit 1
     fi
     ;;
@@ -206,6 +210,7 @@ case "$(lower "${ENABLE_AOT}")" in
     ;;
   *)
     log "ERROR: Invalid ENABLE_AOT value: ${ENABLE_AOT} (expected: auto|true|false|generate)"
+    log "ERROR: See https://github.com/Hybrowse/hytale-server-docker/blob/main/docs/image/configuration.md"
     exit 1
     ;;
 esac
