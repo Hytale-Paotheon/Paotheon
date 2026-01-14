@@ -115,6 +115,23 @@ See: [`curseforge-mods.md`](curseforge-mods.md)
 | `HYTALE_VALIDATE_WORLD_GEN` | `false` | If `true`, passes `--validate-world-gen`. |
 | `HYTALE_WORLD_GEN_PATH` | *(empty)* | Passed as `--world-gen`. |
 
+### CurseForge mod management
+
+| Variable | Default | Description |
+|---|---:|---|
+| `HYTALE_CURSEFORGE_MODS` | *(empty)* | Space/newline-separated list of mod references (enables CurseForge mod management). |
+| `HYTALE_CURSEFORGE_API_KEY` | *(empty)* | CurseForge API key (**secret**). Prefer `*_SRC` in production. |
+| `HYTALE_CURSEFORGE_API_KEY_SRC` | *(empty)* | Path to a file containing the API key (Docker secrets recommended). |
+| `HYTALE_CURSEFORGE_AUTO_UPDATE` | `true` | If `true`, checks for updates on startup (downloads only when needed). If `false`, keeps an already installed version. |
+| `HYTALE_CURSEFORGE_RELEASE_CHANNEL` | `release` | Allowed channels: `release`, `beta`, `alpha`, `any`. |
+| `HYTALE_CURSEFORGE_GAME_VERSION_FILTER` | *(empty)* | Filters `gameVersions[]` in the CurseForge API response. Leave empty to accept all versions. |
+| `HYTALE_CURSEFORGE_CHECK_INTERVAL_SECONDS` | `0` | If `> 0`, skips remote checks when the last check was recent (reduces API usage on frequent restarts). |
+| `HYTALE_CURSEFORGE_PRUNE` | `false` | If `true`, removes previously installed CurseForge mods that are no longer listed in `HYTALE_CURSEFORGE_MODS`. |
+| `HYTALE_CURSEFORGE_FAIL_ON_ERROR` | `false` | If `true`, fails container startup when any configured mod cannot be resolved/installed. |
+| `HYTALE_CURSEFORGE_LOCK` | `true` | If `false`, disables the CurseForge install lock (power users). |
+
+See: [`curseforge-mods.md`](curseforge-mods.md)
+
 ## Examples
 
 ### Change bind address / port
