@@ -57,6 +57,63 @@ This image supports **automatic mod download and updates from CurseForge**.
 
 See: [`curseforge-mods.md`](curseforge-mods.md)
 
+## Pre-start downloads (universe / mods)
+
+On startup, this image can optionally download additional content into the server data directories **before** starting the Java process.
+
+Supported targets:
+
+- `universe/` (world + player save data)
+- `mods/`
+
+The download list is a space/comma/newline-separated list of `http://` / `https://` URLs.
+Each list item can also be a reference to a file by prefixing it with `@`.
+The file is read line-by-line; empty lines and `# comments` are ignored.
+
+Each URL is downloaded at most once per `/data` volume by default (a marker file is stored under `/data/.hytale-prestart-downloads/`).
+To re-download, use the `*_FORCE=true` option.
+
+Downloaded files:
+
+- If the downloaded payload is a ZIP archive, it is extracted into the destination directory.
+- Otherwise the payload is saved as a file in the destination directory.
+
+Optional throttling:
+
+- `*_LIMIT_RATE` maps to `curl --limit-rate` (for example `500k`, `2m`).
+
+Security notes:
+
+- The image does not log URL query strings and redacts URL userinfo (for example `https://user:pass@...`).
+- Only `http(s)` is supported.
+
+### Example (download a universe and mods)
+
+```yaml
+services:
+  hytale:
+    environment:
+      HYTALE_UNIVERSE_DOWNLOAD_URLS: "https://example.com/my-universe.zip"
+      HYTALE_UNIVERSE_DOWNLOAD_LIMIT_RATE: "5m"
+
+      HYTALE_MODS_DOWNLOAD_URLS: "@/data/mods-urls.txt"
+      HYTALE_MODS_DOWNLOAD_LIMIT_RATE: "2m"
+```
+
+Multiline example:
+
+```yaml
+services:
+  hytale:
+    environment:
+      HYTALE_UNIVERSE_DOWNLOAD_URLS: |
+        https://example.com/a.zip
+        https://example.com/b.zip
+      HYTALE_MODS_DOWNLOAD_URLS: |
+        https://example.com/mod1.zip, https://example.com/mod2.zip
+        https://example.com/mod3.zip
+```
+
 ## Config file interpolation (CFG_*)
 
 On startup, this image can replace placeholders in JSON config files using environment variables.
@@ -237,6 +294,16 @@ In JSON:
 | `HYTALE_VALIDATE_PREFABS` | *(empty)* | If set to `true`, passes `--validate-prefabs`. Otherwise passes `--validate-prefabs <value>`. |
 | `HYTALE_VALIDATE_WORLD_GEN` | `false` | If `true`, passes `--validate-world-gen`. |
 | `HYTALE_WORLD_GEN_PATH` | *(empty)* | Passed as `--world-gen`. |
+| `HYTALE_UNIVERSE_DOWNLOAD_URLS` | *(empty)* | Space/comma/newline-separated list of universe download URLs (or `@/path/to/list.txt`) to fetch before server start. |
+| `HYTALE_UNIVERSE_DOWNLOAD_PATH` | *(empty)* | Destination directory for universe downloads. Defaults to `HYTALE_UNIVERSE_PATH` if set, otherwise `/data/server/universe`. |
+| `HYTALE_UNIVERSE_DOWNLOAD_LIMIT_RATE` | *(empty)* | Bandwidth limit passed to `curl --limit-rate` (e.g. `500k`, `2m`). |
+| `HYTALE_UNIVERSE_DOWNLOAD_FORCE` | `false` | If `true`, downloads even if a previous run already downloaded the same URL. |
+| `HYTALE_UNIVERSE_DOWNLOAD_FAIL_ON_ERROR` | `true` | If `true`, fails container startup when any universe download fails. |
+| `HYTALE_MODS_DOWNLOAD_URLS` | *(empty)* | Space/comma/newline-separated list of mod download URLs (or `@/path/to/list.txt`) to fetch before server start. |
+| `HYTALE_MODS_DOWNLOAD_PATH` | *(empty)* | Destination directory for mods downloads. Defaults to `HYTALE_MODS_PATH` if set, otherwise `/data/server/mods`. |
+| `HYTALE_MODS_DOWNLOAD_LIMIT_RATE` | *(empty)* | Bandwidth limit passed to `curl --limit-rate` (e.g. `500k`, `2m`). |
+| `HYTALE_MODS_DOWNLOAD_FORCE` | `false` | If `true`, downloads even if a previous run already downloaded the same URL. |
+| `HYTALE_MODS_DOWNLOAD_FAIL_ON_ERROR` | `true` | If `true`, fails container startup when any mods download fails. |
 
 ### CurseForge mod management
 

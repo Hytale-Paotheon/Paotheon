@@ -60,6 +60,22 @@ set -e
 echo "${out}" | grep -q "Backup: enabled" || fail "expected backup enabled log"
 pass "backup can be enabled via HYTALE_ENABLE_BACKUP"
 
+# Test 3c: pre-start downloads must fail fast on unsupported URL schemes (no network)
+bad_urls="$(printf '%s\n' \
+  "ftp://example.com/mod-a.zip, ftp://example.com/mod-b.zip" \
+  "ftp://example.com/mod-c.zip")"
+set +e
+out="$(docker run --rm \
+  -e "HYTALE_MODS_DOWNLOAD_URLS=${bad_urls}" \
+  -v "${workdir}:/data" \
+  "${IMAGE_NAME}" 2>&1)"
+status=$?
+set -e
+[ ${status} -ne 0 ] || fail "expected non-zero exit status when mods download URL scheme is unsupported"
+count="$(printf '%s' "${out}" | grep -c "mods download: unsupported URL scheme" 2>/dev/null || echo 0)"
+[ "${count}" -eq 3 ] || fail "expected 3 unsupported scheme errors (comma + newline parsing), got ${count}"
+pass "pre-start downloads fail fast on unsupported URL schemes"
+
 # Test 4: auto-download must refuse non-official downloader URLs (no network)
 workdir2="$(mktemp -d)"
 chmod 0777 "${workdir2}"

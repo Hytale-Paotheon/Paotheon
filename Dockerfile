@@ -19,9 +19,10 @@ COPY scripts/entrypoint.sh /usr/local/bin/hytale-entrypoint
 COPY scripts/cfg-interpolate.sh /usr/local/bin/hytale-cfg-interpolate
 COPY scripts/auto-download.sh /usr/local/bin/hytale-auto-download
 COPY scripts/curseforge-mods.sh /usr/local/bin/hytale-curseforge-mods
+COPY scripts/prestart-downloads.sh /usr/local/bin/hytale-prestart-downloads
 COPY scripts/hytale-cli.sh /usr/local/bin/hytale-cli
 COPY scripts/healthcheck.sh /usr/local/bin/hytale-healthcheck
-RUN chmod 0755 /usr/local/bin/hytale-entrypoint /usr/local/bin/hytale-cfg-interpolate /usr/local/bin/hytale-auto-download /usr/local/bin/hytale-curseforge-mods /usr/local/bin/hytale-cli /usr/local/bin/hytale-healthcheck
+RUN chmod 0755 /usr/local/bin/hytale-entrypoint /usr/local/bin/hytale-cfg-interpolate /usr/local/bin/hytale-auto-download /usr/local/bin/hytale-curseforge-mods /usr/local/bin/hytale-prestart-downloads /usr/local/bin/hytale-cli /usr/local/bin/hytale-healthcheck
 
 USER hytale
 
