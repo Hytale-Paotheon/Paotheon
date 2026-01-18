@@ -100,6 +100,7 @@ download_url_list() {
   extract_zip="$8"
 
   mkdir -p "${dest_dir}" "${state_dir}"
+  chmod 0777 "${DATA_DIR}/.hytale-prestart-downloads" "${state_dir}" 2>/dev/null || true
   check_dir_writable "${dest_dir}"
   check_dir_writable "${state_dir}"
 
