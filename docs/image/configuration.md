@@ -57,10 +57,127 @@ This image supports **automatic mod download and updates from CurseForge**.
 
 See: [`curseforge-mods.md`](curseforge-mods.md)
 
+## Config file interpolation (CFG_*)
+
+On startup, this image can replace placeholders in JSON config files using environment variables.
+
+Processed files:
+
+- `/data/server/config.json`
+- all `*.json` files under `/data/server/mods/`
+- all `*.json` files under `HYTALE_MODS_PATH` (if set)
+
+Interpolation runs **after** CurseForge mod installation (if enabled) and **before** the server process is started.
+
+### Placeholders
+
+The entrypoint searches JSON string values for references to variables prefixed with `CFG_`.
+You can use:
+
+- `${CFG_FOO}`
+- `$CFG_FOO`
+
+### Typing rules (important)
+
+There are two modes:
+
+- If a JSON string value is **exactly** a placeholder, for example:
+
+  - `"${CFG_MAX_PLAYERS}"`
+
+  then the value is replaced with a **typed JSON value** when possible.
+  The environment variable is interpreted as JSON via `jq fromjson`.
+  Examples:
+
+  - `CFG_MAX_PLAYERS=20` becomes `20`
+  - `CFG_PUBLIC=true` becomes `true`
+  - `CFG_NAME='"My Server"'` becomes `"My Server"`
+  - `CFG_OBJ='{"a":1}'` becomes `{ "a": 1 }`
+
+  If parsing as JSON fails, the value is used as a normal string.
+
+- If the placeholder appears **inside a larger string**, for example:
+
+  - `"Welcome to ${CFG_SERVER_NAME}!"`
+
+  then the variable value is substituted as plain text.
+
+### Enable/disable
+
+- Enabled by default.
+- To disable interpolation entirely, set:
+
+  - `HYTALE_CFG_INTERPOLATION=false`
+
+### Scope / performance / safety controls
+
+To reduce startup time and avoid applying interpolation to plugin-generated data files, you can scope interpolation.
+
+Modes:
+
+- `HYTALE_CFG_INTERPOLATION_MODE=server-only` (default)
+
+  - Only interpolates `/data/server/config.json`
+
+- `HYTALE_CFG_INTERPOLATION_MODE=all`
+
+  - Always interpolates `/data/server/config.json`
+  - Also interpolates JSON files under `/data/server/mods/` and `HYTALE_MODS_PATH`
+
+- `HYTALE_CFG_INTERPOLATION_MODE=explicit`
+
+  - Always interpolates `/data/server/config.json`
+  - Additionally interpolates only the paths listed in `HYTALE_CFG_INTERPOLATION_PATHS`
+
+`HYTALE_CFG_INTERPOLATION_PATHS` accepts space-separated paths. Each entry can be:
+
+- a file (relative to `/data/server/` or an absolute path)
+- a directory (all `*.json` files beneath it will be processed)
+
+Optional limits:
+
+- `HYTALE_CFG_INTERPOLATION_MAX_BYTES` (empty by default)
+
+  - If set to a number, skips JSON files larger than this size.
+
+- `HYTALE_CFG_INTERPOLATION_EXCLUDE_PATHS` (empty by default)
+
+  - Space-separated shell glob patterns matched against the full file path.
+  - If a file matches, it is skipped.
+
+Security note:
+
+- `CFG_*` can be used for secrets if plugins only support secrets via config files.
+- To reduce risk of accidental substitution into large/untrusted plugin-generated files (or files that might be exposed to players), prefer `server-only` or `explicit`.
+
+### Example
+
+```yaml
+services:
+  hytale:
+    environment:
+      CFG_SERVER_NAME: "My Server"
+      CFG_MAX_PLAYERS: "20"
+```
+
+In JSON:
+
+```json
+{
+  "name": "${CFG_SERVER_NAME}",
+  "maxPlayers": "${CFG_MAX_PLAYERS}"
+}
+```
+
 ## Environment variables
 
 | Variable | Default | Description |
 |---|---:|---|
+| `HYTALE_CFG_INTERPOLATION` | `true` | If `false`, disables `CFG_*` placeholder interpolation in JSON config files at startup. |
+| `HYTALE_CFG_INTERPOLATION_MODE` | `server-only` | Scope for interpolation: `all`, `server-only`, or `explicit`. |
+| `HYTALE_CFG_INTERPOLATION_PATHS` | *(empty)* | When `HYTALE_CFG_INTERPOLATION_MODE=explicit`: additional paths (files/dirs) to process. Relative paths are resolved against `/data/server/`. |
+| `HYTALE_CFG_INTERPOLATION_EXCLUDE_PATHS` | *(empty)* | Space-separated shell glob patterns (matched against full file paths) to skip during interpolation. |
+| `HYTALE_CFG_INTERPOLATION_MAX_BYTES` | *(empty)* | If set: skip JSON files larger than this size (bytes). |
 | `HYTALE_MACHINE_ID` | *(empty)* | 32-character hex string for the container's machine ID (hardware UUID workaround). Auto-generated and persisted if not set. |
 | `HYTALE_SERVER_JAR` | `/data/server/HytaleServer.jar` | Path to `HytaleServer.jar` inside the container. |
 | `HYTALE_ASSETS_PATH` | `/data/Assets.zip` | Path to `Assets.zip` inside the container. |

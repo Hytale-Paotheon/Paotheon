@@ -16,10 +16,11 @@ VOLUME ["/data"]
 WORKDIR /data
 
 COPY scripts/entrypoint.sh /usr/local/bin/hytale-entrypoint
+COPY scripts/cfg-interpolate.sh /usr/local/bin/hytale-cfg-interpolate
 COPY scripts/auto-download.sh /usr/local/bin/hytale-auto-download
 COPY scripts/curseforge-mods.sh /usr/local/bin/hytale-curseforge-mods
 COPY scripts/hytale-cli.sh /usr/local/bin/hytale-cli
-RUN chmod 0755 /usr/local/bin/hytale-entrypoint /usr/local/bin/hytale-auto-download /usr/local/bin/hytale-curseforge-mods /usr/local/bin/hytale-cli
+RUN chmod 0755 /usr/local/bin/hytale-entrypoint /usr/local/bin/hytale-cfg-interpolate /usr/local/bin/hytale-auto-download /usr/local/bin/hytale-curseforge-mods /usr/local/bin/hytale-cli
 
 USER hytale
 

@@ -29,10 +29,10 @@ This roadmap focuses on delivering a **secure, fast, and easy-to-operate** Docke
 - Documentation:
   - Compose quickstart
   - firewall/port-forwarding notes (UDP)
+- Config file interpolation via environment variables (e.g. `CFG_*`), to generate/update config files at startup
  
 ## Next (operator UX & reliability)
 
-- Config file interpolation via environment variables (e.g. `CFG_*`), to generate/update config files at startup
 - Troubleshooting commands and diagnostics output (versions, config paths, bind info)
 - Configurable UID/GID for file permission alignment
 - Graceful shutdown behavior with documented stop/grace period

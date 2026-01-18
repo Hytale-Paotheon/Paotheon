@@ -208,6 +208,8 @@ if [ -n "${HYTALE_CURSEFORGE_MODS}" ]; then
   /usr/local/bin/hytale-curseforge-mods
 fi
 
+/usr/local/bin/hytale-cfg-interpolate
+
 log "Starting Hytale dedicated server"
 log "- Assets: ${HYTALE_ASSETS_PATH}"
 log "- Bind: ${HYTALE_BIND}"
