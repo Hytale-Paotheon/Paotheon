@@ -124,6 +124,11 @@ Server operators are responsible for complying with the Hytale EULA, Terms of Se
  
 Current repository license (releases after v0.4.0): [`LICENSE`](LICENSE)
 
+Non-binding summary (see [`LICENSE`](LICENSE) for the full, binding terms):
+ 
+- Free production use is permitted for self-operated communities that are not a managed service, within the license’s free-use thresholds (currently: Peak CCU <= 250 and Peak Game Server Count <= 10).
+- Managed-service/hosting usage requires a commercial agreement.
+
 Apache-2.0 license text for releases v0.4.0 and older: [`LICENSE-APACHE-2.0`](LICENSE-APACHE-2.0)
 
 See also: [`NOTICE`](NOTICE).
