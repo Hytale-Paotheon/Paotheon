@@ -89,12 +89,6 @@ See: [`docs/image/configuration.md`](docs/image/configuration.md#send-console-co
 
 Hytale requires **Java 25**.
 This image uses **Adoptium / Eclipse Temurin 25**.
-
-## Planned features
-
-See [`ROADMAP.md`](ROADMAP.md) for details. Highlights:
-
-- **Planned next**: graceful shutdown guidance, basic healthcheck (with a way to disable), diagnostics helpers, observability guidance, provider-grade patterns
  
 ## Documentation
  

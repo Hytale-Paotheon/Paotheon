@@ -13,7 +13,7 @@ Thanks for contributing!
 - improvements to container behavior (startup checks, better defaults)
 - documentation improvements
 - bug fixes
-- new features aligned with `ROADMAP.md`
+- new features aligned with the project's scope and operational model
  
 ## What we do not accept
  
