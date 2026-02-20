@@ -79,6 +79,72 @@ count="$(printf '%s' "${out}" | grep -cF "unsupported URL scheme" 2>/dev/null ||
 [ "${count}" -eq 3 ] || fail "expected 3 unsupported scheme errors (comma + newline parsing), got ${count}"
 pass "pre-start downloads fail fast on unsupported URL schemes"
 
+# Test 3d: config defaults should be created and patchable via HYTALE_CONFIG_*
+workdir_cfg="$(mktemp -d)"
+chmod 0777 "${workdir_cfg}"
+mkdir -p "${workdir_cfg}/server"
+chmod 0777 "${workdir_cfg}/server"
+: > "${workdir_cfg}/Assets.zip"
+: > "${workdir_cfg}/server/HytaleServer.jar"
+set +e
+out="$(docker run --rm \
+  -e HYTALE_CONFIG_SERVER_NAME="Compose Server" \
+  -e HYTALE_CONFIG_MOTD="Hello from env" \
+  -e HYTALE_CONFIG_PASSWORD="letmein" \
+  -e HYTALE_CONFIG_MAX_PLAYERS="67" \
+  -e HYTALE_CONFIG_MAX_VIEW_RADIUS="24" \
+  -e HYTALE_CONFIG_DEFAULT_WORLD="sandbox" \
+  -e HYTALE_CONFIG_DEFAULT_GAME_MODE="Creative" \
+  -v "${workdir_cfg}:/data" \
+  "${IMAGE_NAME}" 2>&1)"
+status=$?
+set -e
+[ ${status} -ne 0 ] || fail "expected non-zero exit status due to dummy jar"
+[ -f "${workdir_cfg}/server/config.json" ] || fail "expected config.json to be created"
+jq -e '
+  .ServerName == "Compose Server"
+  and .MOTD == "Hello from env"
+  and .Password == "letmein"
+  and .MaxPlayers == 67
+  and .MaxViewRadius == 24
+  and .Defaults.World == "sandbox"
+  and .Defaults.GameMode == "Creative"
+' "${workdir_cfg}/server/config.json" >/dev/null || fail "expected HYTALE_CONFIG_* values in config.json"
+pass "config defaults are created and patched via HYTALE_CONFIG_*"
+
+# Test 3e: config JSON merge patch should update nested values on existing config
+set +e
+out="$(docker run --rm \
+  -e HYTALE_CONFIG_PATCH_JSON='{"Defaults":{"GameMode":"Adventure","World":"island"},"PlayerStorage":{"Type":"Custom"}}' \
+  -e HYTALE_CONFIG_SERVER_NAME="Compose Server 2" \
+  -v "${workdir_cfg}:/data" \
+  "${IMAGE_NAME}" 2>&1)"
+status=$?
+set -e
+[ ${status} -ne 0 ] || fail "expected non-zero exit status due to dummy jar"
+jq -e '
+  .ServerName == "Compose Server 2"
+  and .Defaults.World == "island"
+  and .Defaults.GameMode == "Adventure"
+  and .PlayerStorage.Type == "Custom"
+  and .MaxPlayers == 67
+' "${workdir_cfg}/server/config.json" >/dev/null || fail "expected HYTALE_CONFIG_PATCH_JSON deep merge updates"
+pass "config JSON merge patch updates existing config safely"
+
+# Test 3f: invalid config patch JSON must fail fast
+set +e
+out="$(docker run --rm \
+  -e HYTALE_CONFIG_PATCH_JSON='not-json' \
+  -v "${workdir_cfg}:/data" \
+  "${IMAGE_NAME}" 2>&1)"
+status=$?
+set -e
+[ ${status} -ne 0 ] || fail "expected non-zero exit status for invalid HYTALE_CONFIG_PATCH_JSON"
+echo "${out}" | grep -q "HYTALE_CONFIG_PATCH_JSON must be a JSON object" || fail "expected invalid JSON patch error"
+pass "invalid config patch JSON fails fast"
+
+rm -rf "${workdir_cfg}"
+
 # Test 4: auto-download must refuse non-official downloader URLs (no network)
 workdir2="$(mktemp -d)"
 chmod 0777 "${workdir2}"

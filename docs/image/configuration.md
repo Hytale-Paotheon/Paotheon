@@ -47,9 +47,10 @@ The startup sequence is fixed and relevant when combining auto-download and toke
 1. Validate required files (`/data/Assets.zip`, `/data/server/HytaleServer.jar`) and run auto-download/update if enabled.
 2. Install/update CurseForge mods (if configured).
 3. Run pre-start universe/mod downloads (if configured).
-4. Apply `CFG_*` interpolation.
-5. Run Session Token Broker (if enabled and tokens are not already set).
-6. Start the Java server process.
+4. Ensure `/data/server/config.json` exists and apply `HYTALE_CONFIG_*` patches.
+5. Apply `CFG_*` interpolation.
+6. Run Session Token Broker (if enabled and tokens are not already set).
+7. Start the Java server process.
 
 This means: if an earlier step fails or blocks (for example downloader auth on first run), the Session Token Broker step is not reached yet.
 
@@ -185,6 +186,54 @@ services:
         https://example.com/mod3.zip
 ```
 
+## Server config patching (`HYTALE_CONFIG_*`)
+
+On startup, this image ensures `/data/server/config.json` exists:
+
+- If missing, it is created from a bundled default template.
+- Then optional `HYTALE_CONFIG_*` overrides are applied.
+- If the template is unavailable, the image does not pre-create `config.json`; the server creates it on first start.
+  In that case, `HYTALE_CONFIG_*` overrides are skipped for that startup.
+
+This works for both first start and existing servers and does not require `${CFG_*}` placeholders.
+
+Convenience overrides:
+
+- `HYTALE_CONFIG_SERVER_NAME`
+- `HYTALE_CONFIG_MOTD`
+- `HYTALE_CONFIG_PASSWORD` (**secret**)
+- `HYTALE_CONFIG_MAX_PLAYERS`
+- `HYTALE_CONFIG_MAX_VIEW_RADIUS`
+- `HYTALE_CONFIG_DEFAULT_WORLD`
+- `HYTALE_CONFIG_DEFAULT_GAME_MODE`
+
+Advanced overrides:
+
+- `HYTALE_CONFIG_PATCH_JSON` (must be a JSON object)
+- `HYTALE_CONFIG_PATCH_JSON_SRC` (path to a file containing a JSON object)
+
+`HYTALE_CONFIG_PATCH_JSON` and `HYTALE_CONFIG_PATCH_JSON_SRC` are mutually exclusive.
+
+Patch behavior:
+
+- Existing keys not mentioned in overrides are preserved.
+- Nested objects are merged recursively.
+- Convenience variables override conflicting keys from `HYTALE_CONFIG_PATCH_JSON`.
+- Invalid JSON or invalid numeric values fail startup early (no partial writes).
+
+Example:
+
+```yaml
+services:
+  hytale:
+    environment:
+      HYTALE_CONFIG_SERVER_NAME: "My Server"
+      HYTALE_CONFIG_MOTD: "Welcome"
+      HYTALE_CONFIG_PASSWORD: "secret"
+      HYTALE_CONFIG_MAX_PLAYERS: "50"
+      HYTALE_CONFIG_PATCH_JSON: '{"Defaults":{"World":"creative-island"}}'
+```
+
 ## Config file interpolation (CFG_*)
 
 On startup, this image can replace placeholders in JSON config files using environment variables.
@@ -306,17 +355,29 @@ In JSON:
 | `HYTALE_CFG_INTERPOLATION_PATHS` | *(empty)* | When `HYTALE_CFG_INTERPOLATION_MODE=explicit`: additional paths (files/dirs) to process. Relative paths are resolved against `/data/server/`. |
 | `HYTALE_CFG_INTERPOLATION_EXCLUDE_PATHS` | *(empty)* | Space-separated shell glob patterns (matched against full file paths) to skip during interpolation. |
 | `HYTALE_CFG_INTERPOLATION_MAX_BYTES` | *(empty)* | If set: skip JSON files larger than this size (bytes). |
+| `HYTALE_CONFIG_PATH` | `/data/server/config.json` | Path to the server config JSON file that is created/patched at startup. |
+| `HYTALE_DEFAULT_CONFIG_PATH` | `/usr/share/hytale/default-config.json` | Source template path used when `HYTALE_CONFIG_PATH` does not exist yet. |
+| `HYTALE_CONFIG_SERVER_NAME` | *(unset)* | Sets `ServerName` in `config.json` (applied at every startup). |
+| `HYTALE_CONFIG_MOTD` | *(unset)* | Sets `MOTD` in `config.json` (applied at every startup). |
+| `HYTALE_CONFIG_PASSWORD` | *(unset)* | Sets `Password` in `config.json` (applied at every startup, **secret**). |
+| `HYTALE_CONFIG_MAX_PLAYERS` | *(unset)* | Sets `MaxPlayers` (integer) in `config.json`. |
+| `HYTALE_CONFIG_MAX_VIEW_RADIUS` | *(unset)* | Sets `MaxViewRadius` (integer) in `config.json`. |
+| `HYTALE_CONFIG_DEFAULT_WORLD` | *(unset)* | Sets `Defaults.World` in `config.json`. |
+| `HYTALE_CONFIG_DEFAULT_GAME_MODE` | *(unset)* | Sets `Defaults.GameMode` in `config.json`. |
+| `HYTALE_CONFIG_PATCH_JSON` | *(unset)* | JSON object merged into `config.json` before convenience variables are applied. |
+| `HYTALE_CONFIG_PATCH_JSON_SRC` | *(unset)* | Path to a file containing a JSON object merged into `config.json`. |
 | `HYTALE_MACHINE_ID` | *(empty)* | 32-character hex string for the container's machine ID (hardware UUID workaround). Auto-generated and persisted if not set. |
 | `HYTALE_SERVER_JAR` | `/data/server/HytaleServer.jar` | Path to `HytaleServer.jar` inside the container. |
 | `HYTALE_ASSETS_PATH` | `/data/Assets.zip` | Path to `Assets.zip` inside the container. |
 | `HYTALE_AOT_PATH` | `/data/server/HytaleServer.aot` | Path to the AOT cache file. |
 | `HYTALE_BIND` | `0.0.0.0:5520` | Bind address for QUIC/UDP. |
-| `HYTALE_AUTH_MODE` | `authenticated` | Authentication mode (`authenticated` or `offline`). |
+| `HYTALE_AUTH_MODE` | `authenticated` | Authentication mode (`authenticated`, `offline`, or `insecure`). |
 | `HYTALE_DISABLE_SENTRY` | `false` | If `true`, passes `--disable-sentry`. |
 | `HYTALE_ACCEPT_EARLY_PLUGINS` | `false` | If `true`, passes `--accept-early-plugins` (acknowledges unsupported early plugins). |
 | `HYTALE_ENABLE_BACKUP` | `false` | If `true`, passes `--backup`. |
 | `HYTALE_BACKUP_DIR` | *(empty)* | Passed as `--backup-dir`. |
 | `HYTALE_BACKUP_FREQUENCY_MINUTES` | `30` | Passed as `--backup-frequency`. |
+| `HYTALE_BACKUP_ARCHIVE_MAX_COUNT` | *(empty)* | Passed as `--backup-archive-max-count`. |
 | `HYTALE_BACKUP_MAX_COUNT` | `5` | Passed as `--backup-max-count`. |
 | `HYTALE_SERVER_SESSION_TOKEN` | *(empty)* | Passed as `--session-token` (**secret**). |
 | `HYTALE_SERVER_IDENTITY_TOKEN` | *(empty)* | Passed as `--identity-token` (**secret**). |
@@ -354,6 +415,7 @@ In JSON:
 | `HYTALE_ALLOW_OP` | `false` | If `true`, enables the `/op self` command. |
 | `HYTALE_BARE` | `false` | If `true`, passes `--bare`. |
 | `HYTALE_BOOT_COMMAND` | *(empty)* | Passed as `--boot-command`. |
+| `HYTALE_CLIENT_PID` | *(empty)* | Passed as `--client-pid` (advanced/debug use cases). |
 | `HYTALE_DISABLE_ASSET_COMPARE` | `false` | If `true`, passes `--disable-asset-compare`. |
 | `HYTALE_DISABLE_CPB_BUILD` | `false` | If `true`, passes `--disable-cpb-build`. |
 | `HYTALE_DISABLE_FILE_WATCHER` | `false` | If `true`, passes `--disable-file-watcher`. |
@@ -362,12 +424,15 @@ In JSON:
 | `HYTALE_FORCE_NETWORK_FLUSH` | `true` | If `true`, passes `--force-network-flush`. |
 | `HYTALE_GENERATE_SCHEMA` | `false` | If `true`, passes `--generate-schema`. |
 | `HYTALE_LOG` | *(empty)* | Passed as `--log`. |
+| `HYTALE_MIGRATE_WORLDS` | *(empty)* | Passed as `--migrate-worlds`. |
+| `HYTALE_MIGRATIONS` | *(empty)* | Passed as `--migrations`. |
 | `HYTALE_MODS_PATH` | *(empty)* | Passed as `--mods`. If `HYTALE_CURSEFORGE_MODS` is set and you did not explicitly set `HYTALE_MODS_PATH`, it defaults to `/data/server/mods-curseforge`. |
 | `HYTALE_OWNER_NAME` | *(empty)* | Passed as `--owner-name`. |
 | `HYTALE_OWNER_UUID` | *(empty)* | Passed as `--owner-uuid`. |
 | `HYTALE_PREFAB_CACHE_PATH` | *(empty)* | Passed as `--prefab-cache`. |
 | `HYTALE_SHUTDOWN_AFTER_VALIDATE` | `false` | If `true`, passes `--shutdown-after-validate`. |
 | `HYTALE_SINGLEPLAYER` | `false` | If `true`, passes `--singleplayer`. |
+| `HYTALE_SKIP_MOD_VALIDATION` | `false` | If `true`, mod validation is skipped. |
 | `HYTALE_TRANSPORT` | *(empty)* | Passed as `--transport`. |
 | `HYTALE_UNIVERSE_PATH` | *(empty)* | Passed as `--universe`. |
 | `HYTALE_VALIDATE_ASSETS` | `false` | If `true`, passes `--validate-assets`. |
