@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # --- Configuration ---
-HYTALE_GAME_ID=6660
+HYTALE_GAME_ID=70216
 QUIET_MODE=0
 
 # --- Function Definitions ---
@@ -82,12 +82,17 @@ if [ ${QUIET_MODE} -eq 0 ]; then
 fi
 
 ID_LIST=""
-for mod_name in "${MOD_NAMES[@]}"; do
+for original_mod_name in "${MOD_NAMES[@]}"; do
+  # Extrai a parte do nome após o último ':'
+  # Ex: "Buuz135:AdminUI" se torna "AdminUI"
+  # Se não houver ':', usa o nome original
+  mod_name_to_search="${original_mod_name##*:}"
+
   # Usa --data-urlencode para que o curl codifique o nome do mod automaticamente
   response=$(curl -s -G -H "x-api-key: ${CURSEFORGE_API_KEY}" \
     "https://api.curseforge.com/v1/mods/search" \
     --data-urlencode "gameId=${HYTALE_GAME_ID}" \
-    --data-urlencode "searchFilter=${mod_name}" \
+    --data-urlencode "searchFilter=${mod_name_to_search}" \
     --data-urlencode "sortField=2" \
     --data-urlencode "sortOrder=desc")
 
@@ -99,9 +104,9 @@ for mod_name in "${MOD_NAMES[@]}"; do
 
     if [ -n "$project_id" ] && [ "$project_id" != "null" ]; then
       printf "Busca: '%-25s' -> Encontrado: '%-30s' | Project ID: %-10s | Slug: %s\n" \
-        "${mod_name}" "${project_name}" "${project_id}" "${project_slug}"
+        "${original_mod_name}" "${project_name}" "${project_id}" "${project_slug}"
     else
-      printf "Busca: '%-25s' -> NENHUM RESULTADO ENCONTRADO\n" "${mod_name}"
+      printf "Busca: '%-25s' -> NENHUM RESULTADO ENCONTRADO\n" "${original_mod_name}"
     fi
   else
     if [ -n "$project_id" ] && [ "$project_id" != "null" ]; then
