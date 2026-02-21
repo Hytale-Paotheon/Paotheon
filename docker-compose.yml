@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  hytale:
+    # Usa o Dockerfile local para construir a imagem, garantindo que suas
+    # modificações nos scripts sejam sempre aplicadas.
+    build: .
+    image: hytale-paotheon:local
+    container_name: hytale_server
+    restart: unless-stopped
+
+    # Habilita o modo interativo para os comandos de autenticação do servidor
+    tty: true
+    stdin_open: true
+
+    # Mapeia a porta do jogo do container para a sua VPS
+    ports:
+      - "5520:5520/udp"
+
+    # Mapeia a pasta 'data' da sua VPS para a pasta '/data' dentro do container,
+    # garantindo que os dados do seu mundo, mods e configurações persistam.
+    volumes:
+      - ./data:/data
+
+    environment:
+      # --- Configurações Principais ---
+      HYTALE_AUTO_DOWNLOAD: "true"
+      HYTALE_AUTO_UPDATE: "true"
+      TZ: "America/Sao_Paulo" # Fuso horário (opcional, ajuste para o seu)
+
+      # --- Configurações de Nome e Jogo ---
+      HYTALE_CONFIG_SERVER_NAME: "Servidor Hytale do Paotheon"
+      HYTALE_CONFIG_MOTD: "Bem-vindo!"
+      HYTALE_CONFIG_MAX_PLAYERS: "20"
+
+      # --- Configuração de Mods via CI/CD ---
+      # Ativa o gerenciamento de mods via CurseForge
+      # A lista de IDs virá da variável de ambiente MOD_PROJECT_IDS, criada pelo deploy.yml
+      HYTALE_CURSEFORGE_MODS: ${MOD_PROJECT_IDS}
+      
+      # Se você decidir usar o formato JSON no futuro, descomente a linha abaixo
+      # HYTALE_CURSEFORGE_MODS_JSON_ENABLED: "true"
+
+      # A chave da API do CurseForge, vinda do deploy.yml
+      HYTALE_CURSEFORGE_API_KEY: ${CURSEFORGE_API_KEY}
+
+      # --- Placeholders para o config.json do seu mod ---
+      # Exemplo de como você usaria as variáveis do seu deploy.yml
+      # CFG_API_KEY_DO_MOD: ${API_KEY_DO_MOD_SECRETO}
+      # CFG_SERVER_PORT: ${SERVER_PORT}
+
+      # --- Otimizações de Memória JVM (ajuste conforme a sua VPS) ---
+      JVM_XMS: "2G"
+      JVM_XMX: "6G"
