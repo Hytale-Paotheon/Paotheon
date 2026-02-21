@@ -61,7 +61,7 @@ jobs:
 
             # Constrói a imagem Docker localmente com as últimas alterações e sobe os containers
             # A flag --build garante que suas modificações nos scripts sejam aplicadas
-            docker compose up -d --build
+            docker compose -f docker-compose.yml up -d --build
 
             # Limpa imagens Docker antigas e não utilizadas para economizar espaço
             docker image prune -f
