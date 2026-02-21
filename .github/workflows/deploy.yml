@@ -14,34 +14,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Debug - Show script content
-        run: |
-          echo "--- Conteúdo do find-mod-ids.sh ---"
-          cat scripts/find-mod-ids.sh
-          echo "--- Fim do conteúdo ---"
-
-      - name: Find Mod Project IDs
+      - name: Prepare Mod List from CSV
         id: find_ids
         run: |
-          # Torna o script executável
-          chmod +x scripts/find-mod-ids.sh
-
-          if [ -f mods/config.json ]; then
-            echo "Extraindo nomes de mods de 'mods/config.json'..."
-            MOD_NAMES=$(jq -r '.Mods | keys[]' mods/config.json)
-
-            if [ -z "$MOD_NAMES" ]; then
-              echo "Nenhum mod encontrado em 'mods/config.json'."
-              echo "project_ids=" >> $GITHUB_OUTPUT
-            else
-              echo "Buscando Project IDs para os seguintes mods:"
-              echo "$MOD_NAMES"
-              MOD_IDS=$(CURSEFORGE_API_KEY=${{ secrets.CURSEFORGE_API_KEY }} scripts/find-mod-ids.sh -q <<< "$MOD_NAMES")
-              echo "Found mod IDs: $MOD_IDS"
-              echo "project_ids=$MOD_IDS" >> $GITHUB_OUTPUT
-            fi
+          if [ -f mods.csv ]; then
+            # Pula o cabeçalho, filtra linhas com ",Sim,", pega a 5a coluna, e junta com espaços
+            MOD_IDS=$(tail -n +2 mods.csv | grep -i ',Sim,' | cut -d ',' -f 5 | tr '\n' ' ' | sed 's/ *$//')
+            echo "Project IDs a serem instalados: $MOD_IDS"
+            echo "project_ids=$MOD_IDS" >> $GITHUB_OUTPUT
           else
-            echo "mods/config.json not found, skipping mod ID search."
+            echo "mods.csv not found, skipping mod installation."
             echo "project_ids=" >> $GITHUB_OUTPUT
           fi
 
