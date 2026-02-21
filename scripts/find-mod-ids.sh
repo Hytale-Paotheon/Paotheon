@@ -83,9 +83,13 @@ fi
 
 ID_LIST=""
 for mod_name in "${MOD_NAMES[@]}"; do
-  encoded_name=$(jq -s -R -r @uri <<< "$mod_name")
-  response=$(curl -s -H "x-api-key: ${CURSEFORGE_API_KEY}" \
-    "https://api.curseforge.com/v1/mods/search?gameId=${HYTALE_GAME_ID}&searchFilter=${encoded_name}&sortField=2&sortOrder=desc")
+  # Usa --data-urlencode para que o curl codifique o nome do mod automaticamente
+  response=$(curl -s -G -H "x-api-key: ${CURSEFORGE_API_KEY}" \
+    "https://api.curseforge.com/v1/mods/search" \
+    --data-urlencode "gameId=${HYTALE_GAME_ID}" \
+    --data-urlencode "searchFilter=${mod_name}" \
+    --data-urlencode "sortField=2" \
+    --data-urlencode "sortOrder=desc")
 
   project_id=$(echo "$response" | jq -r '.data[0].id')
 
