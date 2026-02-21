@@ -1,0 +1,65 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main # Altere para a branch de deploy desejada (ex: production)
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Find Mod Project IDs
+        id: find_ids
+        run: |
+          # Torna o script executável
+          chmod +x scripts/find-mod-ids.sh
+
+          # Executa o script lendo de mod-list.txt (se existir) e captura os IDs
+          if [ -f mod-list.txt ]; then
+            MOD_IDS=$(CURSEFORGE_API_KEY=${{ secrets.CURSEFORGE_API_KEY }} ./scripts/find-mod-ids.sh -q < mod-list.txt)
+            echo "Found mod IDs: $MOD_IDS"
+            echo "project_ids=$MOD_IDS" >> $GITHUB_OUTPUT
+          else
+            echo "mod-list.txt not found, skipping mod ID search."
+            echo "project_ids=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            # Navega para a pasta do projeto na VPS
+            # ATENÇÃO: Verifique e ajuste o caminho se for diferente de '~/Paotheon'
+            cd ~/Paotheon || exit 1 # Se a pasta não existe, aborta
+
+            # Puxa as últimas alterações do Git (garante que docker-compose.yml esteja atualizado)
+            git pull
+
+            # Garante que o diretório de destino para o config.json do mod exista
+            mkdir -p data/server/mods/
+
+            # Copia o config.json do mod para o local correto no volume de dados
+            # ATENÇÃO: Altere 'mod-configs/meu-mod/config.json' para o caminho real do seu arquivo no repositório
+            cp mod-configs/meu-mod/config.json data/server/mods/config.json
+
+            # Gera o arquivo .env com os segredos e os IDs de mods encontrados
+            echo "CURSEFORGE_API_KEY=${{ secrets.CURSEFORGE_API_KEY }}" > .env
+            echo "API_KEY_DO_MOD_SECRETO=${{ secrets.API_KEY_DO_MOD_SECRETO }}" >> .env
+            echo "SERVER_PORT=${{ secrets.SERVER_PORT }}" >> .env
+            echo "MOD_PROJECT_IDS=${{ steps.find_ids.outputs.project_ids }}" >> .env
+
+            # Constrói a imagem Docker localmente com as últimas alterações e sobe os containers
+            # A flag --build garante que suas modificações nos scripts sejam aplicadas
+            docker-compose up -d --build
+
+            # Limpa imagens Docker antigas e não utilizadas para economizar espaço
+            docker image prune -f

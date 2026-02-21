@@ -94,11 +94,34 @@ Notes:
 - `@/path/to/mods.txt`
   - Load additional entries from a file inside the container
 
+### Mod reference formats (JSON)
+
+You can enable parsing of `HYTALE_CURSEFORGE_MODS` as a JSON array of strings by setting `HYTALE_CURSEFORGE_MODS_JSON_ENABLED=true`. Each string in the array should follow the same format as the plain text references.
+
+This can be useful for managing a large number of mods or for programmatic generation of the mod list.
+
+Example (Docker Compose):
+
+```yaml
+services:
+  hytale:
+    environment:
+      HYTALE_CURSEFORGE_MODS_JSON_ENABLED: "true"
+      HYTALE_CURSEFORGE_MODS: |
+        [
+          "123456",
+          "234567:3456789",
+          "456789@server",
+          "@/path/to/mods.txt"
+        ]
+```
+
 ## Environment variables
 
 | Variable | Default | Description |
 |---|---:|---|
 | `HYTALE_CURSEFORGE_MODS` | *(empty)* | Enables CurseForge mod management and lists mod references. |
+| `HYTALE_CURSEFORGE_MODS_JSON_ENABLED` | `false` | If `true`, `HYTALE_CURSEFORGE_MODS` will be parsed as a JSON array of strings, where each string is a mod reference. |
 | `HYTALE_CURSEFORGE_API_KEY` | *(empty)* | CurseForge API key (**secret**). Prefer `*_SRC` in production. |
 | `HYTALE_CURSEFORGE_API_KEY_SRC` | *(empty)* | Path to a file containing the API key (Docker secrets recommended). |
 | `HYTALE_CURSEFORGE_AUTO_UPDATE` | `true` | If `true`, checks for updates on startup (downloads only when needed). If `false`, keeps an already installed version. |

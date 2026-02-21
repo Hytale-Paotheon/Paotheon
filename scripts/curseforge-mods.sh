@@ -76,6 +76,7 @@ HYTALE_CURSEFORGE_HTTP_CACHE_DOWNLOAD_URL="${HYTALE_CURSEFORGE_HTTP_CACHE_DOWNLO
 HYTALE_MODS_PATH="${HYTALE_MODS_PATH:-}"
 
 HYTALE_CURSEFORGE_MODS="${HYTALE_CURSEFORGE_MODS:-}"
+HYTALE_CURSEFORGE_MODS_JSON_ENABLED="${HYTALE_CURSEFORGE_MODS_JSON_ENABLED:-false}"
 HYTALE_CURSEFORGE_API_KEY="${HYTALE_CURSEFORGE_API_KEY:-}"
 HYTALE_CURSEFORGE_API_KEY_SRC="${HYTALE_CURSEFORGE_API_KEY_SRC:-}"
 HYTALE_CURSEFORGE_AUTO_UPDATE="${HYTALE_CURSEFORGE_AUTO_UPDATE:-true}"
@@ -91,8 +92,31 @@ if is_true "${HYTALE_CURSEFORGE_DEBUG}"; then
   debug_enabled=1
 fi
 
+get_mod_references() {
+  input="$1"
+  json_enabled="$2"
+
+  if is_true "${json_enabled}"; then
+    debug "Parsing HYTALE_CURSEFORGE_MODS as JSON..."
+    # Validate it's valid JSON first
+    if ! echo "${input}" | jq -e . >/dev/null 2>&1; then
+      log "ERROR: HYTALE_CURSEFORGE_MODS_JSON_ENABLED is true, but HYTALE_CURSEFORGE_MODS is not valid JSON."
+      if is_true "${HYTALE_CURSEFORGE_FAIL_ON_ERROR}"; then
+        exit 1
+      fi
+      printf '' # Return empty to avoid errors
+      return 0
+    fi
+    # Parse as JSON array, then iterate and print each element
+    echo "${input}" | jq -r '.[] | @text'
+  else
+    debug "Parsing HYTALE_CURSEFORGE_MODS as plain text..."
+    expand_refs "${input}"
+  fi
+}
+
 if is_true "${HYTALE_CURSEFORGE_EXPAND_REFS_ONLY}"; then
-  expand_refs "${HYTALE_CURSEFORGE_MODS}"
+  get_mod_references "${HYTALE_CURSEFORGE_MODS}" "${HYTALE_CURSEFORGE_MODS_JSON_ENABLED}"
   exit 0
 fi
 
@@ -592,7 +616,7 @@ errors=0
 did_remote_check=0
 installed_mod_ids=""
 
-refs="$(expand_refs "${HYTALE_CURSEFORGE_MODS}")"
+refs="$(get_mod_references "${HYTALE_CURSEFORGE_MODS}" "${HYTALE_CURSEFORGE_MODS_JSON_ENABLED}")"
 
 refs_file="$(mktemp /tmp/hytale-curseforge-mods.XXXXXX 2>/dev/null || mktemp)"
 printf '%s\n' "${refs}" >"${refs_file}"

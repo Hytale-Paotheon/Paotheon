@@ -1,0 +1,454 @@
+{
+    "Version": 4,
+    "Mods": {
+        "kyuubisoft:achievements": {
+            "Enabled": false
+        },
+        "Buuz135:AdminUI": {
+            "Enabled": true
+        },
+        "Buuz135:AdvancedItemInfo": {
+            "Enabled": false
+        },
+        "com.alexispace:Alexi\u0027s RowBoat": {
+            "Enabled": false
+        },
+        "RocketSheep:AreaDepositorMod": {
+            "Enabled": false
+        },
+        "Makapar:AreaIndicator": {
+            "Enabled": true
+        },
+        "ArmorStand:ArmorStand": {
+            "Enabled": true
+        },
+        "Bonnibel:Arrow Hud": {
+            "Enabled": true
+        },
+        "BlackAures:Aures - Horse Skins": {
+            "Enabled": false
+        },
+        "BlackAures:Aures - Livestock Skins": {
+            "Enabled": false
+        },
+        "MichaelBlades:AutoFarmer": {
+            "Enabled": false
+        },
+        "MiniBox:AutoStorage": {
+            "Enabled": true
+        },
+        "AvidPixel:AvidPixel\u0027s Infinite Water Supply": {
+            "Enabled": true
+        },
+        "benndevs:Ben\u0027s Sharks": {
+            "Enabled": true
+        },
+        "lilethan000:Better Loot": {
+            "Enabled": true
+        },
+        "iTzKenar:Better Wardrobes": {
+            "Enabled": false
+        },
+        "Drex:BetterItemViewer": {
+            "Enabled": false
+        },
+        "dev.ninesliced:BetterMap": {
+            "Enabled": true
+        },
+        "Buuz135:BetterModlist": {
+            "Enabled": false
+        },
+        "sum1000:Boat Collections": {
+            "Enabled": false
+        },
+        "BetterBridges:Bridges": {
+            "Enabled": true
+        },
+        "TeeEmDee:Brighter Torches": {
+            "Enabled": false
+        },
+        "vhsdoggy:Builder\u0027s Workbench\u002B": {
+            "Enabled": false
+        },
+        "ChestRangeMod:ChestRangeMod": {
+            "Enabled": false
+        },
+        "DasEric:ChestTerminal": {
+            "Enabled": false
+        },
+        "dev.hytalemodding:Clock HUD": {
+            "Enabled": false
+        },
+        "CoinsAndMarkets:Coins \u0026 Markets": {
+            "Enabled": false
+        },
+        "works.jox:ComMenu": {
+            "Enabled": false
+        },
+        "kyuubisoft:core": {
+            "Enabled": false
+        },
+        "nekonesse:Cubie\u0027s Better Building": {
+            "Enabled": true
+        },
+        "DejansMods:Dejans_Rock_Structures": {
+            "Enabled": true
+        },
+        "DejansMods:Dejans_Structures": {
+            "Enabled": true
+        },
+        "nConditional:Diagonal_Fences": {
+            "Enabled": true
+        },
+        "Serilum:DisabledDurability": {
+            "Enabled": false
+        },
+        "JacobG:DoubleBeds": {
+            "Enabled": true
+        },
+        "Skara Bay:Emerald Armor": {
+            "Enabled": true
+        },
+        "Config:Endgame\u0026QoL": {
+            "Enabled": true
+        },
+        "Onilke:Expanded Necromancy": {
+            "Enabled": true
+        },
+        "Leiv436:Extended  Backpacks": {
+            "Enabled": false
+        },
+        "com.hytale:ExtendedTeleportHistory": {
+            "Enabled": false
+        },
+        "JarHax:EyeSpy": {
+            "Enabled": false
+        },
+        "org.Krynnx:Farming Overhaul": {
+            "Enabled": true
+        },
+        "Serilum:FirstJoinMessage": {
+            "Enabled": false
+        },
+        "xytronix:Forgotten Temple": {
+            "Enabled": true
+        },
+        "Jodo:FreeCam": {
+            "Enabled": true
+        },
+        "egominer\u0027s:Glider": {
+            "Enabled": false
+        },
+        "Linceros:GrabFromFar": {
+            "Enabled": false
+        },
+        "DragoKane:GrapplingHookMod": {
+            "Enabled": false
+        },
+        "Zurku:Gravestones": {
+            "Enabled": true
+        },
+        "HF:HorseFollow": {
+            "Enabled": false
+        },
+        "Serilum:Hybrid": {
+            "Enabled": true
+        },
+        "hychatter:HyChatter": {
+            "Enabled": false
+        },
+        "CowMaster:Hyfarm": {
+            "Enabled": true
+        },
+        "TheRedlotus:HyFishing": {
+            "Enabled": true
+        },
+        "com.hymarkers:HyMarkers": {
+            "Enabled": false
+        },
+        "B3cks:HyMenu": {
+            "Enabled": true
+        },
+        "HyOptimizer:HyOptimizer": {
+            "Enabled": true
+        },
+        "dev.hytalemodding:Hyssentials": {
+            "Enabled": false
+        },
+        "com.hypersonicsharkz:Hytalor": {
+            "Enabled": true
+        },
+        "HyTame:HyTame": {
+            "Enabled": false
+        },
+        "Build-9:Hyxin": {
+            "Enabled": false
+        },
+        "BlameJared:ItemMagnet": {
+            "Enabled": true
+        },
+        "JacobG:JLib": {
+            "Enabled": true
+        },
+        "AmoAster:Kytale": {
+            "Enabled": true
+        },
+        "com.linceros:LevelTools": {
+            "Enabled": true
+        },
+        "GameMaster:Longbows Collection": {
+            "Enabled": true
+        },
+        "Buuz135:LuckyMining": {
+            "Enabled": true
+        },
+        "SketchMacaw:Macaw\u0027s Hy Lights": {
+            "Enabled": true
+        },
+        "SketchMacaw:Macaw\u0027s Hy Paths": {
+            "Enabled": true
+        },
+        "SketchMacaw:Macaw\u0027s Hy Stairs": {
+            "Enabled": true
+        },
+        "SketchMacaw:Macaw\u0027s Hy Windows": {
+            "Enabled": true
+        },
+        "me.Zistroxy:Mighty Staffs": {
+            "Enabled": false
+        },
+        "BlameJared:MinersHelmet": {
+            "Enabled": false
+        },
+        "Ziggfreed:MMOSkillTree": {
+            "Enabled": true
+        },
+        "Voidane:MobCatcher": {
+            "Enabled": false
+        },
+        "Skovos:More Arrows by Skovos": {
+            "Enabled": false
+        },
+        "Sebastian:MoreMounts": {
+            "Enabled": true
+        },
+        "Mort:Mort\u0027s Wandering Merchant": {
+            "Enabled": false
+        },
+        "Buuz135:MultipleHUD": {
+            "Enabled": true
+        },
+        "IBC:Multitools": {
+            "Enabled": true
+        },
+        "Frotty27:NameplateBuilder": {
+            "Enabled": true
+        },
+        "works.jox:Okey": {
+            "Enabled": true
+        },
+        "Hytaled:Optimizer": {
+            "Enabled": false
+        },
+        "Fyrrage:Outlanders Armor Pack": {
+            "Enabled": false
+        },
+        "sn0wkzy:party": {
+            "Enabled": false
+        },
+        "com.carsonk:Party Plugin": {
+            "Enabled": false
+        },
+        "tsumori:partypro": {
+            "Enabled": true
+        },
+        "narwhals:Perfect Parries": {
+            "Enabled": true
+        },
+        "Pedrijoe:PJ-HyperSalvager": {
+            "Enabled": false
+        },
+        "heypr:PlayerCompass": {
+            "Enabled": false
+        },
+        "SAIMUSGAMING:Portal World": {
+            "Enabled": true
+        },
+        "quest_request_boards:Quest \u0026 Request Boards": {
+            "Enabled": true
+        },
+        "kyuubisoft:questbook": {
+            "Enabled": false
+        },
+        "Serilum:RecipeWisdom": {
+            "Enabled": true
+        },
+        "net.night:RecoverArrows": {
+            "Enabled": true
+        },
+        "Conczin:Resource Groups": {
+            "Enabled": true
+        },
+        "NekoPlugins:ReviveMe": {
+            "Enabled": true
+        },
+        "CowMaster:Salvage Everything": {
+            "Enabled": false
+        },
+        "DeftestJester:SecretSlidingDoorBlocks": {
+            "Enabled": true
+        },
+        "Stylax_Shop_Boards:Shop Boards": {
+            "Enabled": false
+        },
+        "ShopSigns:Shop Signs": {
+            "Enabled": false
+        },
+        "StylaxGaming793:Signage Bench": {
+            "Enabled": true
+        },
+        "Buuz135:SimpleClaims": {
+            "Enabled": true
+        },
+        "org.herolias:SimpleEnchantments": {
+            "Enabled": true
+        },
+        "BlameJared:SimplyTrash": {
+            "Enabled": true
+        },
+        "Samiracle:SleepRegeneration": {
+            "Enabled": false
+        },
+        "SlverSkull:SLVR_Robes_\u0026_Spells": {
+            "Enabled": false
+        },
+        "com.clayrok:SocialMenu": {
+            "Enabled": true
+        },
+        "Darkhax:Spellbook": {
+            "Enabled": true
+        },
+        "Serilum:StarterKit": {
+            "Enabled": false
+        },
+        "BlameJared:ThoriumChests": {
+            "Enabled": true
+        },
+        "BlameJared:ThoriumFurnaces": {
+            "Enabled": true
+        },
+        "cali19:TravelingMounts": {
+            "Enabled": true
+        },
+        "Serilum:TreeHarvester": {
+            "Enabled": true
+        },
+        "Vyklade:Unified Magic Theory": {
+            "Enabled": true
+        },
+        "EineNT:VeinMining": {
+            "Enabled": false
+        },
+        "Violet:Violet\u0027s Furnishings": {
+            "Enabled": true
+        },
+        "Violet:Violet\u0027s Music Players": {
+            "Enabled": true
+        },
+        "Violet:Violet\u0027s Plushies": {
+            "Enabled": true
+        },
+        "Violet:Violet\u0027s Wardrobe": {
+            "Enabled": true
+        },
+        "Maxos:Void Scythe Mod": {
+            "Enabled": true
+        },
+        "wanmine:WansWonderWeapon": {
+            "Enabled": true
+        },
+        "Darkhax:WaybackCharm": {
+            "Enabled": false
+        },
+        "x3Dev:Wayfinder": {
+            "Enabled": false
+        },
+        "x3Dev:Waypoints": {
+            "Enabled": false
+        },
+        "com.woxtz.weaponinfo:Weapon Stats Viewer": {
+            "Enabled": true
+        },
+        "Serilum:WelcomeMessage": {
+            "Enabled": false
+        },
+        "Serilum:WhereDidIDie": {
+            "Enabled": false
+        },
+        "Buuz135:WhereThisAt": {
+            "Enabled": true
+        },
+        "Samiracle:WorkbenchTierKeeper": {
+            "Enabled": false
+        },
+        "BackslashRobotics:WorldUpdater": {
+            "Enabled": true
+        },
+        "Conczin:Ymmersive Carpentry": {
+            "Enabled": true
+        },
+        "Conczin:Ymmersive Masonry": {
+            "Enabled": true
+        },
+        "Conczin:Ymmersive Melodies": {
+            "Enabled": false
+        },
+        "Refresh Studios:YUNG\u0027s HyDungeons": {
+            "Enabled": false
+        },
+        "Dray:[Dray\u0027s] Better Spellbooks": {
+            "Enabled": false
+        },
+        "kedo:[kedo] BetterMovement": {
+            "Enabled": false
+        },
+        "NoCube:[NoCube\u0027s] Bakehouse": {
+            "Enabled": false
+        },
+        "NoCube:[NoCube\u0027s] Culinary": {
+            "Enabled": false
+        },
+        "NoCube:[NoCube\u0027s] Cultivation": {
+            "Enabled": false
+        },
+        "NoCube:[NoCube\u0027s] Neon Blocks": {
+            "Enabled": false
+        },
+        "NoCube:[NoCube\u0027s] Orchard": {
+            "Enabled": false
+        },
+        "NoCube:[NoCube\u0027s] Simple Bags": {
+            "Enabled": false
+        },
+        "NoCube:[NoCube\u0027s] Tavern": {
+            "Enabled": false
+        },
+        "NoCube:[NoCube\u0027s] Undead Warriors": {
+            "Enabled": false
+        },
+        "fof1092:EssentialsPlus": {
+            "Enabled": true
+        },
+        "xyz.thelegacyvoyage:HyEssentialsX": {
+            "Enabled": false
+        }
+    },
+    "SkipModValidationForVersion": null,
+    "Backup": {
+        "Enabled": true,
+        "FrequencyMinutes": 30,
+        "Directory": "backup",
+        "MaxCount": 5,
+        "ArchiveMaxCount": 5
+    }
+}
