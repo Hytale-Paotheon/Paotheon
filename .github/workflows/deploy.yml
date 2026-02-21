@@ -44,22 +44,24 @@ jobs:
             # Puxa as últimas alterações do Git (garante que docker-compose.yml esteja atualizado)
             git pull
 
+            # ----- INÍCIO: Seção para o config.json do mod (comentada temporariamente) -----
             # Garante que o diretório de destino para o config.json do mod exista
-            mkdir -p data/server/mods/
-
+            # mkdir -p data/server/mods/
             # Copia o config.json do mod para o local correto no volume de dados
             # ATENÇÃO: Altere 'mod-configs/meu-mod/config.json' para o caminho real do seu arquivo no repositório
-            cp mod-configs/meu-mod/config.json data/server/mods/config.json
+            # cp mod-configs/meu-mod/config.json data/server/mods/config.json
+            # ----- FIM: Seção para o config.json do mod -----
 
             # Gera o arquivo .env com os segredos e os IDs de mods encontrados
             echo "CURSEFORGE_API_KEY=${{ secrets.CURSEFORGE_API_KEY }}" > .env
-            echo "API_KEY_DO_MOD_SECRETO=${{ secrets.API_KEY_DO_MOD_SECRETO }}" >> .env
-            echo "SERVER_PORT=${{ secrets.SERVER_PORT }}" >> .env
+            # Adicione aqui outros segredos que você usa nos placeholders CFG_
+            # echo "API_KEY_DO_MOD_SECRETO=${{ secrets.API_KEY_DO_MOD_SECRETO }}" >> .env # Comentado
+            # echo "SERVER_PORT=${{ secrets.SERVER_PORT }}" >> .env # Comentado
             echo "MOD_PROJECT_IDS=${{ steps.find_ids.outputs.project_ids }}" >> .env
 
             # Constrói a imagem Docker localmente com as últimas alterações e sobe os containers
             # A flag --build garante que suas modificações nos scripts sejam aplicadas
-            docker-compose up -d --build
+            docker compose up -d --build
 
             # Limpa imagens Docker antigas e não utilizadas para economizar espaço
             docker image prune -f
