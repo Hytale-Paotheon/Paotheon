@@ -20,13 +20,22 @@ jobs:
           # Torna o script executável
           chmod +x scripts/find-mod-ids.sh
 
-          # Executa o script lendo de mod-list.txt (se existir) e captura os IDs
-          if [ -f mod-list.txt ]; then
-            MOD_IDS=$(CURSEFORGE_API_KEY=${{ secrets.CURSEFORGE_API_KEY }} ./scripts/find-mod-ids.sh -q < mod-list.txt)
-            echo "Found mod IDs: $MOD_IDS"
-            echo "project_ids=$MOD_IDS" >> $GITHUB_OUTPUT
+          if [ -f mods/config.json ]; then
+            echo "Extraindo nomes de mods de 'mods/config.json'..."
+            MOD_NAMES=$(jq -r '.Mods | keys[]' mods/config.json)
+
+            if [ -z "$MOD_NAMES" ]; then
+              echo "Nenhum mod encontrado em 'mods/config.json'."
+              echo "project_ids=" >> $GITHUB_OUTPUT
+            else
+              echo "Buscando Project IDs para os seguintes mods:"
+              echo "$MOD_NAMES"
+              MOD_IDS=$(CURSEFORGE_API_KEY=${{ secrets.CURSEFORGE_API_KEY }} scripts/find-mod-ids.sh -q <<< "$MOD_NAMES")
+              echo "Found mod IDs: $MOD_IDS"
+              echo "project_ids=$MOD_IDS" >> $GITHUB_OUTPUT
+            fi
           else
-            echo "mod-list.txt not found, skipping mod ID search."
+            echo "mods/config.json not found, skipping mod ID search."
             echo "project_ids=" >> $GITHUB_OUTPUT
           fi
 

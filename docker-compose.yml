@@ -51,4 +51,15 @@ services:
 
       # --- Otimizações de Memória JVM (ajuste conforme a sua VPS) ---
       JVM_XMS: "2G"
-      JVM_XMX: "6G"
+      JVM_XMX: "10G"
+
+      # --- Parâmetros de Performance (G1GC) ---
+      JVM_OPTS: >- 
+        -XX:+UseG1GC
+        -XX:+UnlockExperimentalVMOptions
+        -XX:MaxGCPauseMillis=100
+        -XX:+DisableExplicitGC
+        -XX:TargetSurvivorRatio=90
+        -XX:G1NewSizePercent=35
+        -XX:G1MaxNewSizePercent=60
+        -XX:G1MixedGCLiveThresholdPercent=90
