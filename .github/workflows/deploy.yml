@@ -56,10 +56,10 @@ jobs:
             # ----- FIM: Seção para o config.json do mod -----
 
             # Gera o arquivo .env com os segredos e os IDs de mods encontrados
-            echo "CURSEFORGE_API_KEY=${{ secrets.CURSEFORGE_API_KEY }}" > .env
+            echo 'CURSEFORGE_API_KEY=${{ secrets.CURSEFORGE_API_KEY }}' > .env
             # --- PASSO TEMPORÁRIO DE DEBUG: ESCREVE A CHAVE API PARA UM ARQUIVO LOCAL NA VPS ---
             # ATENÇÃO: REMOVA ESTA LINHA APÓS A DEPURAÇÃO! CONTÉM INFORMAÇÃO SENSÍVEL.
-            echo "${{ secrets.CURSEFORGE_API_KEY }}" > /tmp/curseforge_key.debug
+            echo '${{ secrets.CURSEFORGE_API_KEY }}' > /tmp/curseforge_key.debug
             # ----------------------------------------------------------------------------------
             # Adicione aqui outros segredos que você usa nos placeholders CFG_
             # echo "API_KEY_DO_MOD_SECRETO=${{ secrets.API_KEY_DO_MOD_SECRETO }}" >> .env # Comentado
