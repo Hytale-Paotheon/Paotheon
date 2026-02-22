@@ -56,19 +56,14 @@ jobs:
             # ----- FIM: Seção para o config.json do mod -----
 
             # Gera o arquivo .env com os segredos e os IDs de mods encontrados
-            echo 'CURSEFORGE_API_KEY=${{ secrets.CURSEFORGE_API_KEY }}' > .env
-            # --- PASSO TEMPORÁRIO DE DEBUG: ESCREVE A CHAVE API PARA UM ARQUIVO LOCAL NA VPS ---
-            # ATENÇÃO: REMOVA ESTA LINHA APÓS A DEPURAÇÃO! CONTÉM INFORMAÇÃO SENSÍVEL.
-            echo '${{ secrets.CURSEFORGE_API_KEY }}' > /tmp/curseforge_key.debug
-            # ----------------------------------------------------------------------------------
-            # Adicione aqui outros segredos que você usa nos placeholders CFG_
+            # --- Adicione aqui outros segredos que você usa nos placeholders CFG_ ---
             # echo "API_KEY_DO_MOD_SECRETO=${{ secrets.API_KEY_DO_MOD_SECRETO }}" >> .env # Comentado
             # echo "SERVER_PORT=${{ secrets.SERVER_PORT }}" >> .env # Comentado
             echo "MOD_PROJECT_IDS=${{ steps.find_ids.outputs.project_ids }}" >> .env
 
             # Constrói a imagem Docker localmente com as últimas alterações e sobe os containers
             # A flag --build garante que suas modificações nos scripts sejam aplicadas
-            docker compose -f docker-compose.yml up -d --build
+            docker compose -f docker-compose.yml -e CURSEFORGE_API_KEY="${{ secrets.CURSEFORGE_API_KEY }}" up -d --build
 
             # Limpa imagens Docker antigas e não utilizadas para economizar espaço
             docker image prune -f
