@@ -2,6 +2,7 @@ version: '3.8'
 
 services:
   hytale:
+  
     # Usa o Dockerfile local para construir a imagem, garantindo que suas
     # modificações nos scripts sejam sempre aplicadas.
     build: .
