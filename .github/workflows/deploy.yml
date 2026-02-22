@@ -59,9 +59,10 @@ jobs:
             # --- Adicione aqui outros segredos que você usa nos placeholders CFG_ ---
             # echo "API_KEY_DO_MOD_SECRETO=${{ secrets.API_KEY_DO_MOD_SECRETO }}" >> .env # Comentado
             # echo "SERVER_PORT=${{ secrets.SERVER_PORT }}" >> .env # Comentado
+            printf '%s\n' "CURSEFORGE_API_KEY=${{ secrets.CURSEFORGE_API_KEY }}" >> .env
             echo "MOD_PROJECT_IDS=${{ steps.find_ids.outputs.project_ids }}" >> .env
 
-            export CURSEFORGE_API_KEY="${{ secrets.CURSEFORGE_API_KEY }}"
+
 
             # Constrói a imagem Docker localmente com as últimas alterações e sobe os containers
             # A flag --build garante que suas modificações nos scripts sejam aplicadas
