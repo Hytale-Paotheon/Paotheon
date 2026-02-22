@@ -27,6 +27,7 @@ services:
       HYTALE_AUTO_DOWNLOAD: "true"
       HYTALE_AUTO_UPDATE: "true"
       TZ: "America/Sao_Paulo" # Fuso horário (opcional, ajuste para o seu)
+      HYTALE_CURSEFORGE_DEBUG: "true"
 
       # --- Configurações de Nome e Jogo ---
       HYTALE_CONFIG_SERVER_NAME: "Servidor Hytale do Paotheon"
