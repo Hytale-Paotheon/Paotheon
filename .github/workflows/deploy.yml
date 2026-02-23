@@ -79,6 +79,6 @@ jobs:
             printf '%s' '${{ secrets.CURSEFORGE_API_KEY }}' > secrets/curseforge_api_key.txt
             chmod 600 secrets/curseforge_api_key.txt
 
-            docker compose -f docker-compose.yml up -d --build
+            docker compose -f docker-compose.yml up -d --build --force-recreate
 
             docker image prune -f
