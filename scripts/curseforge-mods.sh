@@ -176,8 +176,8 @@ HYTALE_CURSEFORGE_API_KEY="$(printf '%s' "${HYTALE_CURSEFORGE_API_KEY}" | tr -d 
 EXPECTED_API_KEY_PREFIX='$2a$10$'
 redact_api_key() {
   key="$1"
-  prefix_len=7
-  trailing=2
+  prefix_len=12
+  trailing=4
   total_len="${#key}"
   if [ "${total_len}" -le $((prefix_len + trailing)) ]; then
     printf '%s' "${key}" | cut -c1-$((total_len / 2))
@@ -198,6 +198,7 @@ case "${HYTALE_CURSEFORGE_API_KEY}" in
     exit 0
     ;;
   '$2a$10$'*)
+    log "CurseForge mods: API key: '$(redact_api_key "${HYTALE_CURSEFORGE_API_KEY}")' (comprimento: ${#HYTALE_CURSEFORGE_API_KEY} chars)"
     ;;
   *)
     log "ERROR: API key should start with '${EXPECTED_API_KEY_PREFIX}' but yours looks like '$(redact_api_key "${HYTALE_CURSEFORGE_API_KEY}")'"
