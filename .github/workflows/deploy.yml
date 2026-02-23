@@ -39,7 +39,7 @@ jobs:
           SHEET_ID="1rEjsYYOipf525D7aophmHDkhFRWRQYdSLlBirOdGVBY"
           SHEET_GID="1337076826"
           echo "[deploy] Baixando lista de mods do Google Sheets..."
-          curl -sfL "https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SHEET_GID}" -o mods.csv
+          curl -sfL "https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SHEET_GID}" | tr -d '\r' > mods.csv
 
           # Lê mods.csv: filtra linhas onde Habilitado (coluna NF-1) == "Sim"
           # e Project ID (última coluna) é numérico. Usa NF para ser robusto
