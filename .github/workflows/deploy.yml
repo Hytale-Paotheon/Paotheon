@@ -34,33 +34,23 @@ jobs:
       - name: Prepare Mod List from CSV
         id: find_ids
         run: |
-          chmod +x scripts/find-mod-ids.sh
-
-          if [ ! -f mods/config.json ]; then
-            echo "[deploy] mods/config.json não encontrado, pulando busca de IDs."
+          if [ ! -f mods.csv ]; then
+            echo "[deploy] mods.csv não encontrado."
             echo "project_ids=" >> $GITHUB_OUTPUT
             exit 0
           fi
 
-          # Extrai apenas mods com Enabled: true
-          ENABLED_MODS=$(jq -r '.Mods | to_entries[] | select(.value.Enabled == true) | .key' mods/config.json)
-          MOD_COUNT=$(echo "$ENABLED_MODS" | grep -c . || true)
-          echo "[deploy] $MOD_COUNT mods habilitados encontrados em mods/config.json."
-
-          if [ -z "$ENABLED_MODS" ] || [ "$MOD_COUNT" -eq 0 ]; then
-            echo "[deploy] Nenhum mod habilitado. Pulando busca de IDs."
-            echo "project_ids=" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-
-          # Busca os IDs (logs de detalhe vão para stderr, capturado pelo Actions)
-          MOD_IDS=$(scripts/find-mod-ids.sh -q <<< "$ENABLED_MODS" || true)
+          # Lê mods.csv: filtra linhas onde Habilitado (coluna NF-1) == "Sim"
+          # e Project ID (última coluna) é numérico. Usa NF para ser robusto
+          # a campos com vírgula no meio do nome.
+          MOD_IDS=$(awk -F',' 'NR>1 && $(NF-1)=="Sim" && $NF~/^[0-9]+$/ {printf "%s ", $NF}' mods.csv)
+          MOD_IDS="${MOD_IDS% }"  # remove espaço final
 
           ID_COUNT=$(echo "$MOD_IDS" | tr -s ' ' '\n' | grep -c . || true)
-          echo "[deploy] IDs encontrados: $ID_COUNT / $MOD_COUNT"
+          echo "[deploy] $ID_COUNT Project IDs extraídos de mods.csv."
 
           if [ -z "$MOD_IDS" ]; then
-            echo "[deploy] ERRO: Nenhum Project ID retornado para os mods habilitados."
+            echo "[deploy] ERRO: Nenhum Project ID encontrado em mods.csv."
             exit 1
           fi
 
