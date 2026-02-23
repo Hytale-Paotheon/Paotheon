@@ -805,27 +805,48 @@ else
   printf '=== %s | Sem falhas ===\n' "${run_time}" > "${failures_file}" 2>/dev/null || true
 fi
 
+entry_count="$(wc -l < "${status_entries_file}" 2>/dev/null | tr -d ' ' || echo 0)"
+log "CurseForge mods: Sheets — URL configurada: $([ -n "${HYTALE_CURSEFORGE_SHEETS_URL}" ] && printf 'sim (%s chars)' "${#HYTALE_CURSEFORGE_SHEETS_URL}" || printf 'não')"
+log "CurseForge mods: Sheets — ${entry_count} entradas de status no arquivo temporário"
+
 if [ -z "${HYTALE_CURSEFORGE_SHEETS_URL}" ]; then
-  log "CurseForge mods: HYTALE_CURSEFORGE_SHEETS_URL não configurada — status não enviado ao Google Sheets"
-elif [ -n "${HYTALE_CURSEFORGE_SHEETS_URL}" ]; then
-  status_json=$(jq -Rn '
+  log "CurseForge mods: Sheets — pulando envio (HYTALE_CURSEFORGE_SHEETS_URL não configurada)"
+else
+  status_json="$(jq -Rn '
     reduce (inputs | split("|")) as $parts ({};
       if ($parts[0] != "") then
         . + {($parts[0]): {status: ($parts[1] // ""), reason: ($parts[2] // "")}}
       else . end
     )
-  ' "${status_entries_file}" 2>/dev/null || printf '{}')
+  ' "${status_entries_file}" 2>&1)"
+  jq_rc=$?
+  if [ "${jq_rc}" -ne 0 ]; then
+    log "CurseForge mods: Sheets — ERRO ao construir JSON de status (jq rc=${jq_rc}): ${status_json}"
+    status_json="{}"
+  else
+    log "CurseForge mods: Sheets — JSON de status construído ($(printf '%s' "${status_json}" | wc -c | tr -d ' ') chars)"
+  fi
 
   payload="$(jq -n \
     --arg ts "${run_time}" \
     --arg token "${HYTALE_CURSEFORGE_SHEETS_TOKEN}" \
     --argjson mods "${status_json}" \
-    '{"timestamp": $ts, "token": $token, "mods": $mods}')"
-
-  curl -sfL -X POST "${HYTALE_CURSEFORGE_SHEETS_URL}" \
-    -H "Content-Type: application/json" \
-    -d "${payload}" > /dev/null 2>&1 || true
-  log "CurseForge mods: status enviado ao Google Sheets"
+    '{"timestamp": $ts, "token": $token, "mods": $mods}' 2>&1)"
+  payload_rc=$?
+  if [ "${payload_rc}" -ne 0 ]; then
+    log "CurseForge mods: Sheets — ERRO ao construir payload (jq rc=${payload_rc}): ${payload}"
+  else
+    log "CurseForge mods: Sheets — enviando POST para webhook..."
+    curl_response="$(curl -sL -X POST "${HYTALE_CURSEFORGE_SHEETS_URL}" \
+      -H "Content-Type: application/json" \
+      -d "${payload}" \
+      --max-time 15 --connect-timeout 10 \
+      -w '\nHTTP_CODE:%{http_code}' 2>&1 || printf 'CURL_FAILED')"
+    curl_http="$(printf '%s\n' "${curl_response}" | grep '^HTTP_CODE:' | cut -d: -f2)"
+    curl_body="$(printf '%s\n' "${curl_response}" | grep -v '^HTTP_CODE:')"
+    log "CurseForge mods: Sheets — resposta HTTP: ${curl_http:-desconhecido}"
+    log "CurseForge mods: Sheets — corpo da resposta: ${curl_body}"
+  fi
 fi
 rm -f "${status_entries_file}" 2>/dev/null || true
 
