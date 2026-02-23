@@ -621,6 +621,8 @@ errors=0
 did_remote_check=0
 installed_mod_ids=""
 failed_log=""
+updated_log=""
+sheets_ok=0
 failures_file="${DATA_DIR}/curseforge-mod-failures.log"
 status_entries_file="$(mktemp /tmp/hytale-cf-status.XXXXXX 2>/dev/null || mktemp)"
 HYTALE_CURSEFORGE_SHEETS_URL="$(printf '%s' "${HYTALE_CURSEFORGE_SHEETS_URL:-}" | tr -d '\r')"
@@ -679,7 +681,6 @@ while IFS= read -r ref || [ -n "${ref}" ]; do
       installed_path="$(jq -r --arg mid "${mod_id}" '.mods[$mid].installed.path // empty' "${MANIFEST_PATH}" 2>/dev/null || true)"
       if [ -n "${installed_path}" ] && [ -f "${CF_MODS_DIR}/${installed_path}" ]; then
         installed_mod_ids="${installed_mod_ids}${mod_id}\n"
-        printf '%s|%s|%s\n' "${mod_id}" "" "" >> "${status_entries_file}"
         continue
       fi
     fi
@@ -709,13 +710,11 @@ while IFS= read -r ref || [ -n "${ref}" ]; do
 
     if [ "${skip_remote_checks}" -eq 1 ] && [ -n "${installed_file_id}" ] && [ -n "${installed_path}" ] && [ -f "${CF_MODS_DIR}/${installed_path}" ]; then
       installed_mod_ids="${installed_mod_ids}${mod_id}\n"
-      printf '%s|%s|%s\n' "${mod_id}" "" "" >> "${status_entries_file}"
       continue
     fi
 
     if ! is_true "${HYTALE_CURSEFORGE_AUTO_UPDATE}" && [ -n "${installed_file_id}" ] && [ -n "${installed_path}" ] && [ -f "${CF_MODS_DIR}/${installed_path}" ]; then
       installed_mod_ids="${installed_mod_ids}${mod_id}\n"
-      printf '%s|%s|%s\n' "${mod_id}" "" "" >> "${status_entries_file}"
       continue
     fi
 
@@ -740,7 +739,6 @@ while IFS= read -r ref || [ -n "${ref}" ]; do
 
   if [ -n "${current_file_id}" ] && [ "${current_file_id}" = "${resolved_file_id}" ] && [ -n "${current_path}" ] && [ -f "${CF_MODS_DIR}/${current_path}" ]; then
     installed_mod_ids="${installed_mod_ids}${mod_id}\n"
-    printf '%s|%s|%s\n' "${mod_id}" "" "" >> "${status_entries_file}"
     continue
   fi
 
@@ -761,6 +759,8 @@ while IFS= read -r ref || [ -n "${ref}" ]; do
   fi
 
   printf '%s|%s|%s\n' "${mod_id}" "atualizado" "" >> "${status_entries_file}"
+  updated_log="${updated_log}${ref} | atualizado
+"
   installed_mod_ids="${installed_mod_ids}${mod_id}\n"
   if [ "${visible_name}" != "${current_path}" ] && [ -n "${current_path}" ] && [ -f "${CF_MODS_DIR}/${current_path}" ]; then
     rm -f "${CF_MODS_DIR}/${current_path}" 2>/dev/null || true
@@ -841,15 +841,18 @@ else
     curl_body="$(printf '%s\n' "${curl_response}" | grep -v '^HTTP_CODE:')"
     log "CurseForge mods: Sheets — resposta HTTP: ${curl_http:-desconhecido}"
     log "CurseForge mods: Sheets — corpo da resposta: ${curl_body}"
+    if [ "${curl_http}" = "200" ] && printf '%s' "${curl_body}" | grep -q '"ok":true'; then
+      sheets_ok=1
+    fi
   fi
 fi
 rm -f "${status_entries_file}" 2>/dev/null || true
 
-if [ -n "${failed_log}" ]; then
-  { printf '=== %s | %s falha(s) ===\n' "${run_time}" "${errors}"; printf '%s' "${failed_log}"; } > "${failures_file}" 2>/dev/null || true
-  log "CurseForge mods: ${errors} falha(s) registrada(s) em ${failures_file}"
-else
-  printf '=== %s | Sem falhas ===\n' "${run_time}" > "${failures_file}" 2>/dev/null || true
+if [ -z "${HYTALE_CURSEFORGE_SHEETS_URL}" ] || [ "${sheets_ok}" -ne 1 ]; then
+  if [ -n "${updated_log}" ] || [ -n "${failed_log}" ]; then
+    { printf '=== %s ===\n' "${run_time}"; printf '%s' "${updated_log}"; printf '%s' "${failed_log}"; } > "${failures_file}" 2>/dev/null || true
+    log "CurseForge mods: status salvo em ${failures_file} (fallback — Google Sheets indisponível)"
+  fi
 fi
 
 if [ "${errors}" -gt 0 ] && is_true "${HYTALE_CURSEFORGE_FAIL_ON_ERROR}"; then
