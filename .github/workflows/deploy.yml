@@ -15,10 +15,14 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Check CurseForge API Access
+        env:
+          # Injetar via env: evita que o bash expanda os '$' da key quando
+          # o GitHub Actions substitui ${{ secrets.* }} no texto do script.
+          CF_API_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
         run: |
           echo "[deploy] Testando acesso à API do CurseForge (Game ID: 70216)..."
           HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
-            -H "x-api-key: ${{ secrets.CURSEFORGE_API_KEY }}" \
+            -H "x-api-key: ${CF_API_KEY}" \
             "https://api.curseforge.com/v1/games/70216")
           if [ "$HTTP_CODE" != "200" ]; then
             echo "[deploy] ERRO: API retornou HTTP $HTTP_CODE. Verifique o secret CURSEFORGE_API_KEY."
