@@ -67,8 +67,8 @@ jobs:
             cd ~/Paotheon || exit 1
 
             # Garante que a VPS fique exatamente igual ao remote (ignora divergências locais).
-            git fetch origin main
-            git reset --hard origin/main
+            git fetch origin ${{ github.ref_name }}
+            git reset --hard origin/${{ github.ref_name }}
 
             # IMPORTANTE: printf com aspas simples ao redor do valor evita que o bash
             # expanda os '$' presentes na API key (ex: $2a$10$ viraria a10 com echo "...").
