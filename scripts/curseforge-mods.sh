@@ -623,8 +623,8 @@ installed_mod_ids=""
 failed_log=""
 failures_file="${DATA_DIR}/curseforge-mod-failures.log"
 status_entries_file="$(mktemp /tmp/hytale-cf-status.XXXXXX 2>/dev/null || mktemp)"
-HYTALE_CURSEFORGE_SHEETS_URL="${HYTALE_CURSEFORGE_SHEETS_URL:-}"
-HYTALE_CURSEFORGE_SHEETS_TOKEN="${HYTALE_CURSEFORGE_SHEETS_TOKEN:-}"
+HYTALE_CURSEFORGE_SHEETS_URL="$(printf '%s' "${HYTALE_CURSEFORGE_SHEETS_URL:-}" | tr -d '\r')"
+HYTALE_CURSEFORGE_SHEETS_TOKEN="$(printf '%s' "${HYTALE_CURSEFORGE_SHEETS_TOKEN:-}" | tr -d '\r')"
 
 refs="$(get_mod_references "${HYTALE_CURSEFORGE_MODS}" "${HYTALE_CURSEFORGE_MODS_JSON_ENABLED}")"
 
@@ -805,7 +805,9 @@ else
   printf '=== %s | Sem falhas ===\n' "${run_time}" > "${failures_file}" 2>/dev/null || true
 fi
 
-if [ -n "${HYTALE_CURSEFORGE_SHEETS_URL}" ]; then
+if [ -z "${HYTALE_CURSEFORGE_SHEETS_URL}" ]; then
+  log "CurseForge mods: HYTALE_CURSEFORGE_SHEETS_URL não configurada — status não enviado ao Google Sheets"
+elif [ -n "${HYTALE_CURSEFORGE_SHEETS_URL}" ]; then
   status_json=$(jq -Rn '
     reduce (inputs | split("|")) as $parts ({};
       if ($parts[0] != "") then
