@@ -170,6 +170,9 @@ if [ -z "${HYTALE_CURSEFORGE_API_KEY}" ]; then
   exit 0
 fi
 
+# Strip \r that appears when .env is created on Windows (CRLF line endings)
+HYTALE_CURSEFORGE_API_KEY="$(printf '%s' "${HYTALE_CURSEFORGE_API_KEY}" | tr -d '\r')"
+
 EXPECTED_API_KEY_PREFIX='$2a$10$'
 redact_api_key() {
   key="$1"
@@ -217,9 +220,10 @@ else
 fi
 if [ "${test_http_code}" != "200" ]; then
   log "ERROR: CurseForge API key test failed (HTTP ${test_http_code})"
+  log "ERROR: Key em uso: '$(redact_api_key "${HYTALE_CURSEFORGE_API_KEY}")' (comprimento: ${#HYTALE_CURSEFORGE_API_KEY} chars)"
   log "ERROR: Please verify your API key at https://console.curseforge.com/"
   if [ "${test_http_code}" = "403" ]; then
-    log "ERROR: HTTP 403 = API key is invalid or lacks permissions"
+    log "ERROR: HTTP 403 = API key invalida, corrompida ou sem permissao"
   elif [ "${test_http_code}" = "000" ]; then
     log "ERROR: Could not connect to CurseForge API (network/timeout issue)"
   fi

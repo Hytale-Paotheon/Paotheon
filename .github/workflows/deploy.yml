@@ -3,7 +3,7 @@ name: Deploy to VPS
 on:
   push:
     branches:
-      - main # Altere para a branch de deploy desejada (ex: production)
+      - main
 
 jobs:
   deploy:
@@ -14,36 +14,52 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Debug - Show script content
+      - name: Check CurseForge API Access
         run: |
-          echo "--- Conteúdo do find-mod-ids.sh ---"
-          cat scripts/find-mod-ids.sh
-          echo "--- Fim do conteúdo ---"
+          echo "[deploy] Testando acesso à API do CurseForge (Game ID: 70216)..."
+          HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "x-api-key: ${{ secrets.CURSEFORGE_API_KEY }}" \
+            "https://api.curseforge.com/v1/games/70216")
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "[deploy] ERRO: API retornou HTTP $HTTP_CODE. Verifique o secret CURSEFORGE_API_KEY."
+            exit 1
+          fi
+          echo "[deploy] API acessível (HTTP 200)."
 
       - name: Find Mod Project IDs
         id: find_ids
         run: |
-          # Torna o script executável
           chmod +x scripts/find-mod-ids.sh
 
-          if [ -f mods/config.json ]; then
-            echo "Extraindo nomes de mods de 'mods/config.json'..."
-            MOD_NAMES=$(jq -r '.Mods | keys[]' mods/config.json)
-
-            if [ -z "$MOD_NAMES" ]; then
-              echo "Nenhum mod encontrado em 'mods/config.json'."
-              echo "project_ids=" >> $GITHUB_OUTPUT
-            else
-              echo "Buscando Project IDs para os seguintes mods:"
-              echo "$MOD_NAMES"
-              MOD_IDS=$(CURSEFORGE_API_KEY=${{ secrets.CURSEFORGE_API_KEY }} scripts/find-mod-ids.sh -q <<< "$MOD_NAMES")
-              echo "Found mod IDs: $MOD_IDS"
-              echo "project_ids=$MOD_IDS" >> $GITHUB_OUTPUT
-            fi
-          else
-            echo "mods/config.json not found, skipping mod ID search."
+          if [ ! -f mods/config.json ]; then
+            echo "[deploy] mods/config.json não encontrado, pulando busca de IDs."
             echo "project_ids=" >> $GITHUB_OUTPUT
+            exit 0
           fi
+
+          # Extrai apenas mods com Enabled: true
+          ENABLED_MODS=$(jq -r '.Mods | to_entries[] | select(.value.Enabled == true) | .key' mods/config.json)
+          MOD_COUNT=$(echo "$ENABLED_MODS" | grep -c . || true)
+          echo "[deploy] $MOD_COUNT mods habilitados encontrados em mods/config.json."
+
+          if [ -z "$ENABLED_MODS" ] || [ "$MOD_COUNT" -eq 0 ]; then
+            echo "[deploy] Nenhum mod habilitado. Pulando busca de IDs."
+            echo "project_ids=" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Busca os IDs (logs de detalhe vão para stderr, capturado pelo Actions)
+          MOD_IDS=$(scripts/find-mod-ids.sh -q <<< "$ENABLED_MODS" || true)
+
+          ID_COUNT=$(echo "$MOD_IDS" | tr -s ' ' '\n' | grep -c . || true)
+          echo "[deploy] IDs encontrados: $ID_COUNT / $MOD_COUNT"
+
+          if [ -z "$MOD_IDS" ]; then
+            echo "[deploy] ERRO: Nenhum Project ID retornado para os mods habilitados."
+            exit 1
+          fi
+
+          echo "project_ids=$MOD_IDS" >> $GITHUB_OUTPUT
 
       - name: Deploy to VPS
         uses: appleboy/ssh-action@master
@@ -52,31 +68,15 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
-            # Navega para a pasta do projeto na VPS
-            # ATENÇÃO: Verifique e ajuste o caminho se for diferente de '~/Paotheon'
-            cd ~/Paotheon || exit 1 # Se a pasta não existe, aborta
+            cd ~/Paotheon || exit 1
 
-            # Puxa as últimas alterações do Git (garante que docker-compose.yml esteja atualizado)
             git pull
 
-            # ----- INÍCIO: Seção para o config.json do mod (comentada temporariamente) -----
-            # Garante que o diretório de destino para o config.json do mod exista
-            # mkdir -p data/server/mods/
-            # Copia o config.json do mod para o local correto no volume de dados
-            # ATENÇÃO: Altere 'mod-configs/meu-mod/config.json' para o caminho real do seu arquivo no repositório
-            # cp mod-configs/meu-mod/config.json data/server/mods/config.json
-            # ----- FIM: Seção para o config.json do mod -----
+            # IMPORTANTE: printf com aspas simples ao redor do valor evita que o bash
+            # expanda os '$' presentes na API key (ex: $2a$10$ viraria a10 com echo "...").
+            printf 'CURSEFORGE_API_KEY=%s\n' '${{ secrets.CURSEFORGE_API_KEY }}' > .env
+            printf 'MOD_PROJECT_IDS=%s\n' '${{ steps.find_ids.outputs.project_ids }}' >> .env
 
-            # Gera o arquivo .env com os segredos e os IDs de mods encontrados
-            echo "CURSEFORGE_API_KEY=${{ secrets.CURSEFORGE_API_KEY }}" > .env
-            # Adicione aqui outros segredos que você usa nos placeholders CFG_
-            # echo "API_KEY_DO_MOD_SECRETO=${{ secrets.API_KEY_DO_MOD_SECRETO }}" >> .env # Comentado
-            # echo "SERVER_PORT=${{ secrets.SERVER_PORT }}" >> .env # Comentado
-            echo "MOD_PROJECT_IDS=${{ steps.find_ids.outputs.project_ids }}" >> .env
-
-            # Constrói a imagem Docker localmente com as últimas alterações e sobe os containers
-            # A flag --build garante que suas modificações nos scripts sejam aplicadas
             docker compose -f docker-compose.yml up -d --build
 
-            # Limpa imagens Docker antigas e não utilizadas para economizar espaço
             docker image prune -f
