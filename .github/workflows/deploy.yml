@@ -26,7 +26,8 @@ jobs:
           fi
           echo "[deploy] API acessível (HTTP 200)."
 
-      - name: Find Mod Project IDs
+
+      - name: Prepare Mod List from CSV
         id: find_ids
         run: |
           chmod +x scripts/find-mod-ids.sh

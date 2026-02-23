@@ -118,23 +118,23 @@ services:
 
 ## Environment variables
 
-| Variable | Default | Description |
-|---|---:|---|
-| `HYTALE_CURSEFORGE_MODS` | *(empty)* | Enables CurseForge mod management and lists mod references. |
-| `HYTALE_CURSEFORGE_MODS_JSON_ENABLED` | `false` | If `true`, `HYTALE_CURSEFORGE_MODS` will be parsed as a JSON array of strings, where each string is a mod reference. |
-| `HYTALE_CURSEFORGE_API_KEY` | *(empty)* | CurseForge API key (**secret**). Prefer `*_SRC` in production. |
-| `HYTALE_CURSEFORGE_API_KEY_SRC` | *(empty)* | Path to a file containing the API key (Docker secrets recommended). |
-| `HYTALE_CURSEFORGE_AUTO_UPDATE` | `true` | If `true`, checks for updates on startup (downloads only when needed). If `false`, keeps an already installed version. |
-| `HYTALE_CURSEFORGE_RELEASE_CHANNEL` | `release` | Allowed channels: `release`, `beta`, `alpha`, `any`. |
-| `HYTALE_CURSEFORGE_GAME_VERSION_FILTER` | *(empty)* | Filters `gameVersions[]` in the CurseForge API response. Leave empty to accept all versions. |
-| `HYTALE_CURSEFORGE_CHECK_INTERVAL_SECONDS` | `0` | If `> 0`, skips remote checks when the last check was recent (reduces API usage on frequent restarts). |
-| `HYTALE_CURSEFORGE_PRUNE` | `true` when mods path is not `/data/server/mods`, otherwise `false` | If `true`, removes previously installed CurseForge mods that are no longer listed in `HYTALE_CURSEFORGE_MODS`. |
-| `HYTALE_CURSEFORGE_FAIL_ON_ERROR` | `false` | If `true`, fails container startup when any configured mod cannot be resolved/installed. |
-| `HYTALE_CURSEFORGE_LOCK` | `true` | If `false`, disables the CurseForge install lock (power users). |
-| `HYTALE_CURSEFORGE_HTTP_CACHE_URL` | *(empty)* | Optional HTTP cache gateway base URL used for both API requests and file downloads. |
-| `HYTALE_CURSEFORGE_HTTP_CACHE_API_URL` | *(empty)* | Optional HTTP cache gateway base URL used for CurseForge API requests only. Defaults to `HYTALE_CURSEFORGE_HTTP_CACHE_URL`. |
-| `HYTALE_CURSEFORGE_HTTP_CACHE_DOWNLOAD_URL` | *(empty)* | Optional HTTP cache gateway base URL used for mod file downloads only. Defaults to `HYTALE_CURSEFORGE_HTTP_CACHE_URL`. |
-| `HYTALE_CURSEFORGE_DEBUG` | `false` | If `true`, prints additional diagnostics on API and download failures (does not print the API key). |
+| Variable                                    |                                                             Default | Description                                                                                                                 |
+| ------------------------------------------- | ------------------------------------------------------------------: | --------------------------------------------------------------------------------------------------------------------------- |
+| `HYTALE_CURSEFORGE_MODS`                    |                                                           _(empty)_ | Enables CurseForge mod management and lists mod references.                                                                 |
+| `HYTALE_CURSEFORGE_MODS_JSON_ENABLED`       |                                                             `false` | If `true`, `HYTALE_CURSEFORGE_MODS` will be parsed as a JSON array of strings, where each string is a mod reference.        |
+| `HYTALE_CURSEFORGE_API_KEY`                 |                                                           _(empty)_ | CurseForge API key (**secret**). Prefer `*_SRC` in production.                                                              |
+| `HYTALE_CURSEFORGE_API_KEY_SRC`             |                                                           _(empty)_ | Path to a file containing the API key (Docker secrets recommended).                                                         |
+| `HYTALE_CURSEFORGE_AUTO_UPDATE`             |                                                              `true` | If `true`, checks for updates on startup (downloads only when needed). If `false`, keeps an already installed version.      |
+| `HYTALE_CURSEFORGE_RELEASE_CHANNEL`         |                                                           `release` | Allowed channels: `release`, `beta`, `alpha`, `any`.                                                                        |
+| `HYTALE_CURSEFORGE_GAME_VERSION_FILTER`     |                                                           _(empty)_ | Filters `gameVersions[]` in the CurseForge API response. Leave empty to accept all versions.                                |
+| `HYTALE_CURSEFORGE_CHECK_INTERVAL_SECONDS`  |                                                                 `0` | If `> 0`, skips remote checks when the last check was recent (reduces API usage on frequent restarts).                      |
+| `HYTALE_CURSEFORGE_PRUNE`                   | `true` when mods path is not `/data/server/mods`, otherwise `false` | If `true`, removes previously installed CurseForge mods that are no longer listed in `HYTALE_CURSEFORGE_MODS`.              |
+| `HYTALE_CURSEFORGE_FAIL_ON_ERROR`           |                                                             `false` | If `true`, fails container startup when any configured mod cannot be resolved/installed.                                    |
+| `HYTALE_CURSEFORGE_LOCK`                    |                                                              `true` | If `false`, disables the CurseForge install lock (power users).                                                             |
+| `HYTALE_CURSEFORGE_HTTP_CACHE_URL`          |                                                           _(empty)_ | Optional HTTP cache gateway base URL used for both API requests and file downloads.                                         |
+| `HYTALE_CURSEFORGE_HTTP_CACHE_API_URL`      |                                                           _(empty)_ | Optional HTTP cache gateway base URL used for CurseForge API requests only. Defaults to `HYTALE_CURSEFORGE_HTTP_CACHE_URL`. |
+| `HYTALE_CURSEFORGE_HTTP_CACHE_DOWNLOAD_URL` |                                                           _(empty)_ | Optional HTTP cache gateway base URL used for mod file downloads only. Defaults to `HYTALE_CURSEFORGE_HTTP_CACHE_URL`.      |
+| `HYTALE_CURSEFORGE_DEBUG`                   |                                                             `false` | If `true`, prints additional diagnostics on API and download failures (does not print the API key).                         |
 
 ## Optional: HTTP cache gateway (for ephemeral servers)
 
