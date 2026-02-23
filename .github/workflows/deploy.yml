@@ -71,13 +71,9 @@ jobs:
 
             # IMPORTANTE: printf com aspas simples ao redor do valor evita que o bash
             # expanda os '$' presentes na API key (ex: $2a$10$ viraria a10 com echo "...").
-            printf 'MOD_PROJECT_IDS=%s\n' '${{ steps.find_ids.outputs.project_ids }}' > .env
-
-            # Escreve a API key no arquivo de secret do Docker (lido pelo container via /run/secrets/).
-            # Usa printf '%s' sem newline; o script de mods faz trim(), então tanto faz.
-            mkdir -p secrets
-            printf '%s' '${{ secrets.CURSEFORGE_API_KEY }}' > secrets/curseforge_api_key.txt
-            chmod 600 secrets/curseforge_api_key.txt
+            # O docker-compose lê o .env e passa as variáveis diretamente ao container.
+            printf 'CURSEFORGE_API_KEY=%s\n' '${{ secrets.CURSEFORGE_API_KEY }}' > .env
+            printf 'MOD_PROJECT_IDS=%s\n' '${{ steps.find_ids.outputs.project_ids }}' >> .env
 
             docker compose -f docker-compose.yml up -d --build --force-recreate
 

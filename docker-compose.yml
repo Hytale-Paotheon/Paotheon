@@ -21,9 +21,6 @@ services:
     volumes:
       - ./data:/data
 
-    secrets:
-      - curseforge_api_key
-
     environment:
       # --- Configurações Principais ---
       HYTALE_AUTO_DOWNLOAD: "true"
@@ -37,10 +34,10 @@ services:
       HYTALE_CONFIG_MAX_PLAYERS: "20"
 
       # --- Configuração de Mods via CI/CD ---
-      # Ativa o gerenciamento de mods via CurseForge
-      # A lista de IDs virá da variável de ambiente MOD_PROJECT_IDS, criada pelo deploy.yml
+      # Ativa o gerenciamento de mods via CurseForge.
+      # CURSEFORGE_API_KEY e MOD_PROJECT_IDS são escritos no .env pelo deploy.yml.
       HYTALE_CURSEFORGE_MODS: ${MOD_PROJECT_IDS}
-      HYTALE_CURSEFORGE_API_KEY_SRC: "/run/secrets/curseforge_api_key"
+      HYTALE_CURSEFORGE_API_KEY: ${CURSEFORGE_API_KEY}
       
       # Se você decidir usar o formato JSON no futuro, descomente a linha abaixo
       # HYTALE_CURSEFORGE_MODS_JSON_ENABLED: "true"
@@ -67,6 +64,3 @@ services:
         -XX:G1MaxNewSizePercent=60
         -XX:G1MixedGCLiveThresholdPercent=90
 
-secrets:
-  curseforge_api_key:
-    file: ./secrets/curseforge_api_key.txt
