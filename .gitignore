@@ -3,6 +3,7 @@ local/
 backups/
 data/
 .secrets/
+secrets/*.txt
 .hytale-downloader-credentials.json
  
 hytale-downloader/
