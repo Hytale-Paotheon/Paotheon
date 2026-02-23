@@ -798,13 +798,8 @@ if is_true "${HYTALE_CURSEFORGE_PRUNE}"; then
 fi
 
 run_time="$(date '+%Y-%m-%d %H:%M:%S' 2>/dev/null || printf 'unknown')"
-if [ -n "${failed_log}" ]; then
-  { printf '=== %s | %s falha(s) ===\n' "${run_time}" "${errors}"; printf '%s' "${failed_log}"; } > "${failures_file}" 2>/dev/null || true
-  log "CurseForge mods: ${errors} falha(s) registrada(s) em ${failures_file}"
-else
-  printf '=== %s | Sem falhas ===\n' "${run_time}" > "${failures_file}" 2>/dev/null || true
-fi
 
+log "=== CurseForge mods: iniciando envio de status ao Google Sheets ==="
 entry_count="$(wc -l < "${status_entries_file}" 2>/dev/null | tr -d ' ' || echo 0)"
 log "CurseForge mods: Sheets — URL configurada: $([ -n "${HYTALE_CURSEFORGE_SHEETS_URL}" ] && printf 'sim (%s chars)' "${#HYTALE_CURSEFORGE_SHEETS_URL}" || printf 'não')"
 log "CurseForge mods: Sheets — ${entry_count} entradas de status no arquivo temporário"
@@ -849,6 +844,13 @@ else
   fi
 fi
 rm -f "${status_entries_file}" 2>/dev/null || true
+
+if [ -n "${failed_log}" ]; then
+  { printf '=== %s | %s falha(s) ===\n' "${run_time}" "${errors}"; printf '%s' "${failed_log}"; } > "${failures_file}" 2>/dev/null || true
+  log "CurseForge mods: ${errors} falha(s) registrada(s) em ${failures_file}"
+else
+  printf '=== %s | Sem falhas ===\n' "${run_time}" > "${failures_file}" 2>/dev/null || true
+fi
 
 if [ "${errors}" -gt 0 ] && is_true "${HYTALE_CURSEFORGE_FAIL_ON_ERROR}"; then
   exit 1
