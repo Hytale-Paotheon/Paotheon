@@ -14,11 +14,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Debug - Show CurseForge API Key Snippet
-        run: |
-          KEY="${{ secrets.CURSEFORGE_API_KEY }}"
-          echo "Key length: ${#KEY}"
-          echo "Key starts with: ${KEY:0:10}..." # Print first 10 chars (should be $2a$10$)
+
 
       - name: Prepare Mod List from CSV
         id: find_ids
@@ -55,11 +51,16 @@ jobs:
             # cp mod-configs/meu-mod/config.json data/server/mods/config.json
             # ----- FIM: Seção para o config.json do mod -----
 
-            # Gera o arquivo .env com os segredos e os IDs de mods encontrados
+            # Gera a pasta 'secrets' e o arquivo com a chave API
+            mkdir -p secrets
+            echo '${{ secrets.CURSEFORGE_API_KEY }}' > secrets/curseforge_api_key.txt
+            chmod 400 secrets/curseforge_api_key.txt
+
+            # Gera o arquivo .env com as variáveis de ambiente
+            printf '%s\n' "HYTALE_CURSEFORGE_API_KEY_SRC=/run/secrets/curseforge_api_key" > .env
             # --- Adicione aqui outros segredos que você usa nos placeholders CFG_ ---
             # echo "API_KEY_DO_MOD_SECRETO=${{ secrets.API_KEY_DO_MOD_SECRETO }}" >> .env # Comentado
             # echo "SERVER_PORT=${{ secrets.SERVER_PORT }}" >> .env # Comentado
-            printf '%s\n' "CURSEFORGE_API_KEY=${{ secrets.CURSEFORGE_API_KEY }}" >> .env
             echo "MOD_PROJECT_IDS=${{ steps.find_ids.outputs.project_ids }}" >> .env
 
 
