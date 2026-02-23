@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - feature/google-sheets-integration
   workflow_dispatch:
 
 jobs:
@@ -78,7 +77,6 @@ jobs:
             printf 'SHEETS_WEBHOOK_URL=%s\n' '${{ secrets.SHEETS_WEBHOOK_URL }}' >> .env
             printf 'SHEETS_TOKEN=%s\n' '${{ secrets.SHEETS_TOKEN }}' >> .env
 
-            docker compose -f docker-compose.yml build --no-cache
-            docker compose -f docker-compose.yml up -d --force-recreate
+            docker compose -f docker-compose.yml up -d --build --force-recreate
 
             docker image prune -f
