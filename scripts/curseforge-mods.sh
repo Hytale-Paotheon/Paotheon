@@ -622,6 +622,9 @@ did_remote_check=0
 installed_mod_ids=""
 failed_log=""
 failures_file="${DATA_DIR}/curseforge-mod-failures.log"
+status_entries_file="$(mktemp /tmp/hytale-cf-status.XXXXXX 2>/dev/null || mktemp)"
+HYTALE_CURSEFORGE_SHEETS_URL="$(printf '%s' "${HYTALE_CURSEFORGE_SHEETS_URL:-}" | tr -d '\r')"
+HYTALE_CURSEFORGE_SHEETS_TOKEN="$(printf '%s' "${HYTALE_CURSEFORGE_SHEETS_TOKEN:-}" | tr -d '\r')"
 
 refs="$(get_mod_references "${HYTALE_CURSEFORGE_MODS}" "${HYTALE_CURSEFORGE_MODS_JSON_ENABLED}")"
 
@@ -676,6 +679,7 @@ while IFS= read -r ref || [ -n "${ref}" ]; do
       installed_path="$(jq -r --arg mid "${mod_id}" '.mods[$mid].installed.path // empty' "${MANIFEST_PATH}" 2>/dev/null || true)"
       if [ -n "${installed_path}" ] && [ -f "${CF_MODS_DIR}/${installed_path}" ]; then
         installed_mod_ids="${installed_mod_ids}${mod_id}\n"
+        printf '%s|%s|%s\n' "${mod_id}" "" "" >> "${status_entries_file}"
         continue
       fi
     fi
@@ -683,6 +687,7 @@ while IFS= read -r ref || [ -n "${ref}" ]; do
     if ! cf_get "/v1/mods/${mod_id}/files/${file_id}"; then
       log "WARNING: could not resolve ${ref}"
       errors=$((errors + 1))
+      printf '%s|%s|%s\n' "${mod_id}" "falhou" "could not resolve file (HTTP ${cf_last_http_code})" >> "${status_entries_file}"
       failed_log="${failed_log}${ref} | could not resolve file (HTTP ${cf_last_http_code})
 "
       continue
@@ -692,6 +697,7 @@ while IFS= read -r ref || [ -n "${ref}" ]; do
     if [ -z "${file_json}" ] || [ "${file_json}" = "null" ]; then
       log "WARNING: could not resolve ${ref}"
       errors=$((errors + 1))
+      printf '%s|%s|%s\n' "${mod_id}" "falhou" "could not resolve file (empty response)" >> "${status_entries_file}"
       failed_log="${failed_log}${ref} | could not resolve file (empty response)
 "
       continue
@@ -703,11 +709,13 @@ while IFS= read -r ref || [ -n "${ref}" ]; do
 
     if [ "${skip_remote_checks}" -eq 1 ] && [ -n "${installed_file_id}" ] && [ -n "${installed_path}" ] && [ -f "${CF_MODS_DIR}/${installed_path}" ]; then
       installed_mod_ids="${installed_mod_ids}${mod_id}\n"
+      printf '%s|%s|%s\n' "${mod_id}" "" "" >> "${status_entries_file}"
       continue
     fi
 
     if ! is_true "${HYTALE_CURSEFORGE_AUTO_UPDATE}" && [ -n "${installed_file_id}" ] && [ -n "${installed_path}" ] && [ -f "${CF_MODS_DIR}/${installed_path}" ]; then
       installed_mod_ids="${installed_mod_ids}${mod_id}\n"
+      printf '%s|%s|%s\n' "${mod_id}" "" "" >> "${status_entries_file}"
       continue
     fi
 
@@ -715,6 +723,7 @@ while IFS= read -r ref || [ -n "${ref}" ]; do
     if [ -z "${file_json}" ]; then
       log "WARNING: could not resolve ${ref}"
       errors=$((errors + 1))
+      printf '%s|%s|%s\n' "${mod_id}" "falhou" "no matching file found on CurseForge" >> "${status_entries_file}"
       failed_log="${failed_log}${ref} | no matching file found on CurseForge
 "
       continue
@@ -731,16 +740,19 @@ while IFS= read -r ref || [ -n "${ref}" ]; do
 
   if [ -n "${current_file_id}" ] && [ "${current_file_id}" = "${resolved_file_id}" ] && [ -n "${current_path}" ] && [ -f "${CF_MODS_DIR}/${current_path}" ]; then
     installed_mod_ids="${installed_mod_ids}${mod_id}\n"
+    printf '%s|%s|%s\n' "${mod_id}" "" "" >> "${status_entries_file}"
     continue
   fi
 
   if ! download_and_install "${mod_id}" "${file_json}" >/dev/null; then
     if [ -n "${install_error_reason}" ]; then
       log "WARNING: failed to install mod ${mod_id}: ${install_error_reason}"
+      printf '%s|%s|%s\n' "${mod_id}" "falhou" "${install_error_reason}" >> "${status_entries_file}"
       failed_log="${failed_log}${ref} | ${install_error_reason}
 "
     else
       log "WARNING: failed to install mod ${mod_id}"
+      printf '%s|%s|%s\n' "${mod_id}" "falhou" "install failed (unknown reason)" >> "${status_entries_file}"
       failed_log="${failed_log}${ref} | install failed (unknown reason)
 "
     fi
@@ -748,6 +760,7 @@ while IFS= read -r ref || [ -n "${ref}" ]; do
     continue
   fi
 
+  printf '%s|%s|%s\n' "${mod_id}" "atualizado" "" >> "${status_entries_file}"
   installed_mod_ids="${installed_mod_ids}${mod_id}\n"
   if [ "${visible_name}" != "${current_path}" ] && [ -n "${current_path}" ] && [ -f "${CF_MODS_DIR}/${current_path}" ]; then
     rm -f "${CF_MODS_DIR}/${current_path}" 2>/dev/null || true
@@ -785,6 +798,53 @@ if is_true "${HYTALE_CURSEFORGE_PRUNE}"; then
 fi
 
 run_time="$(date '+%Y-%m-%d %H:%M:%S' 2>/dev/null || printf 'unknown')"
+
+log "=== CurseForge mods: iniciando envio de status ao Google Sheets ==="
+entry_count="$(wc -l < "${status_entries_file}" 2>/dev/null | tr -d ' ' || echo 0)"
+log "CurseForge mods: Sheets — URL configurada: $([ -n "${HYTALE_CURSEFORGE_SHEETS_URL}" ] && printf 'sim (%s chars)' "${#HYTALE_CURSEFORGE_SHEETS_URL}" || printf 'não')"
+log "CurseForge mods: Sheets — ${entry_count} entradas de status no arquivo temporário"
+
+if [ -z "${HYTALE_CURSEFORGE_SHEETS_URL}" ]; then
+  log "CurseForge mods: Sheets — pulando envio (HYTALE_CURSEFORGE_SHEETS_URL não configurada)"
+else
+  status_json="$(jq -Rn '
+    reduce (inputs | split("|")) as $parts ({};
+      if ($parts[0] != "") then
+        . + {($parts[0]): {status: ($parts[1] // ""), reason: ($parts[2] // "")}}
+      else . end
+    )
+  ' "${status_entries_file}" 2>&1)"
+  jq_rc=$?
+  if [ "${jq_rc}" -ne 0 ]; then
+    log "CurseForge mods: Sheets — ERRO ao construir JSON de status (jq rc=${jq_rc}): ${status_json}"
+    status_json="{}"
+  else
+    log "CurseForge mods: Sheets — JSON de status construído ($(printf '%s' "${status_json}" | wc -c | tr -d ' ') chars)"
+  fi
+
+  payload="$(jq -n \
+    --arg ts "${run_time}" \
+    --arg token "${HYTALE_CURSEFORGE_SHEETS_TOKEN}" \
+    --argjson mods "${status_json}" \
+    '{"timestamp": $ts, "token": $token, "mods": $mods}' 2>&1)"
+  payload_rc=$?
+  if [ "${payload_rc}" -ne 0 ]; then
+    log "CurseForge mods: Sheets — ERRO ao construir payload (jq rc=${payload_rc}): ${payload}"
+  else
+    log "CurseForge mods: Sheets — enviando POST para webhook..."
+    curl_response="$(curl -sL -X POST "${HYTALE_CURSEFORGE_SHEETS_URL}" \
+      -H "Content-Type: application/json" \
+      -d "${payload}" \
+      --max-time 15 --connect-timeout 10 \
+      -w '\nHTTP_CODE:%{http_code}' 2>&1 || printf 'CURL_FAILED')"
+    curl_http="$(printf '%s\n' "${curl_response}" | grep '^HTTP_CODE:' | cut -d: -f2)"
+    curl_body="$(printf '%s\n' "${curl_response}" | grep -v '^HTTP_CODE:')"
+    log "CurseForge mods: Sheets — resposta HTTP: ${curl_http:-desconhecido}"
+    log "CurseForge mods: Sheets — corpo da resposta: ${curl_body}"
+  fi
+fi
+rm -f "${status_entries_file}" 2>/dev/null || true
+
 if [ -n "${failed_log}" ]; then
   { printf '=== %s | %s falha(s) ===\n' "${run_time}" "${errors}"; printf '%s' "${failed_log}"; } > "${failures_file}" 2>/dev/null || true
   log "CurseForge mods: ${errors} falha(s) registrada(s) em ${failures_file}"

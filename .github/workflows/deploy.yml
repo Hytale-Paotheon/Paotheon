@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -31,14 +32,13 @@ jobs:
           echo "[deploy] API acessível (HTTP 200)."
 
 
-      - name: Prepare Mod List from CSV
+      - name: Prepare Mod List from Sheets
         id: find_ids
         run: |
-          if [ ! -f mods.csv ]; then
-            echo "[deploy] mods.csv não encontrado."
-            echo "project_ids=" >> $GITHUB_OUTPUT
-            exit 0
-          fi
+          SHEET_ID="1rEjsYYOipf525D7aophmHDkhFRWRQYdSLlBirOdGVBY"
+          SHEET_GID="1337076826"
+          echo "[deploy] Baixando lista de mods do Google Sheets..."
+          curl -sfL "https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SHEET_GID}" | tr -d '\r' > mods.csv
 
           # Lê mods.csv: filtra linhas onde Habilitado (coluna NF-1) == "Sim"
           # e Project ID (última coluna) é numérico. Usa NF para ser robusto
@@ -47,10 +47,10 @@ jobs:
           MOD_IDS="${MOD_IDS% }"  # remove espaço final
 
           ID_COUNT=$(echo "$MOD_IDS" | tr -s ' ' '\n' | grep -c . || true)
-          echo "[deploy] $ID_COUNT Project IDs extraídos de mods.csv."
+          echo "[deploy] $ID_COUNT Project IDs extraídos do Google Sheets."
 
           if [ -z "$MOD_IDS" ]; then
-            echo "[deploy] ERRO: Nenhum Project ID encontrado em mods.csv."
+            echo "[deploy] ERRO: Nenhum Project ID encontrado no Google Sheets."
             exit 1
           fi
 
@@ -66,14 +66,16 @@ jobs:
             cd ~/Paotheon || exit 1
 
             # Garante que a VPS fique exatamente igual ao remote (ignora divergências locais).
-            git fetch origin main
-            git reset --hard origin/main
+            git fetch origin ${{ github.ref_name }}
+            git reset --hard origin/${{ github.ref_name }}
 
             # IMPORTANTE: printf com aspas simples ao redor do valor evita que o bash
             # expanda os '$' presentes na API key (ex: $2a$10$ viraria a10 com echo "...").
             # O docker-compose lê o .env e passa as variáveis diretamente ao container.
             printf 'CURSEFORGE_API_KEY=%s\n' '${{ secrets.CURSEFORGE_API_KEY }}' > .env
             printf 'MOD_PROJECT_IDS=%s\n' '${{ steps.find_ids.outputs.project_ids }}' >> .env
+            printf 'SHEETS_WEBHOOK_URL=%s\n' '${{ secrets.SHEETS_WEBHOOK_URL }}' >> .env
+            printf 'SHEETS_TOKEN=%s\n' '${{ secrets.SHEETS_TOKEN }}' >> .env
 
             docker compose -f docker-compose.yml up -d --build --force-recreate
 
