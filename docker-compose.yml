@@ -23,6 +23,9 @@ services:
     volumes:
       - ./data:/data
 
+    secrets:
+      - curseforge_api_key
+
     environment:
       # --- Configurações Principais ---
       HYTALE_AUTO_DOWNLOAD: "true"
