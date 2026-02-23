@@ -832,7 +832,7 @@ else
     log "CurseForge mods: Sheets — ERRO ao construir payload (jq rc=${payload_rc}): ${payload}"
   else
     log "CurseForge mods: Sheets — enviando POST para webhook..."
-    curl_response="$(curl -sL -X POST "${HYTALE_CURSEFORGE_SHEETS_URL}" \
+    curl_response="$(curl -s --location-trusted -X POST "${HYTALE_CURSEFORGE_SHEETS_URL}" \
       -H "Content-Type: application/json" \
       -d "${payload}" \
       --max-time 15 --connect-timeout 10 \
