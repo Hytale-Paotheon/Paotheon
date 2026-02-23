@@ -40,10 +40,12 @@ jobs:
           echo "[deploy] Baixando lista de mods do Google Sheets..."
           curl -sfL "https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SHEET_GID}" | tr -d '\r' > mods.csv
 
-          # Lê mods.csv: filtra linhas onde Habilitado (coluna NF-1) == "Sim"
-          # e Project ID (última coluna) é numérico. Usa NF para ser robusto
-          # a campos com vírgula no meio do nome.
-          MOD_IDS=$(awk -F',' 'NR>1 && $(NF-1)=="Sim" && $NF~/^[0-9]+$/ {printf "%s ", $NF}' mods.csv)
+          # Lê mods.csv: localiza as colunas "Project ID" e "Habilitado" pelo
+          # cabeçalho e filtra linhas onde Habilitado == "Sim".
+          MOD_IDS=$(awk -F',' '
+            NR==1 { for (i=1; i<=NF; i++) { if ($i=="Project ID") pid_col=i; if ($i=="Habilitado") hab_col=i } }
+            NR>1 && pid_col && hab_col && $hab_col=="Sim" && $pid_col~/^[0-9]+$/ { printf "%s ", $pid_col }
+          ' mods.csv)
           MOD_IDS="${MOD_IDS% }"  # remove espaço final
 
           ID_COUNT=$(echo "$MOD_IDS" | tr -s ' ' '\n' | grep -c . || true)
