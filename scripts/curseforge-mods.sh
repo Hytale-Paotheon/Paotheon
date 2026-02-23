@@ -620,6 +620,8 @@ resolve_best_file() {
 errors=0
 did_remote_check=0
 installed_mod_ids=""
+failed_log=""
+failures_file="${DATA_DIR}/curseforge-mod-failures.log"
 
 refs="$(get_mod_references "${HYTALE_CURSEFORGE_MODS}" "${HYTALE_CURSEFORGE_MODS_JSON_ENABLED}")"
 
@@ -681,6 +683,8 @@ while IFS= read -r ref || [ -n "${ref}" ]; do
     if ! cf_get "/v1/mods/${mod_id}/files/${file_id}"; then
       log "WARNING: could not resolve ${ref}"
       errors=$((errors + 1))
+      failed_log="${failed_log}${ref} | could not resolve file (HTTP ${cf_last_http_code})
+"
       continue
     fi
     file_resp="${cf_last_body}"
@@ -688,6 +692,8 @@ while IFS= read -r ref || [ -n "${ref}" ]; do
     if [ -z "${file_json}" ] || [ "${file_json}" = "null" ]; then
       log "WARNING: could not resolve ${ref}"
       errors=$((errors + 1))
+      failed_log="${failed_log}${ref} | could not resolve file (empty response)
+"
       continue
     fi
     did_remote_check=1
@@ -709,6 +715,8 @@ while IFS= read -r ref || [ -n "${ref}" ]; do
     if [ -z "${file_json}" ]; then
       log "WARNING: could not resolve ${ref}"
       errors=$((errors + 1))
+      failed_log="${failed_log}${ref} | no matching file found on CurseForge
+"
       continue
     fi
     did_remote_check=1
@@ -729,8 +737,12 @@ while IFS= read -r ref || [ -n "${ref}" ]; do
   if ! download_and_install "${mod_id}" "${file_json}" >/dev/null; then
     if [ -n "${install_error_reason}" ]; then
       log "WARNING: failed to install mod ${mod_id}: ${install_error_reason}"
+      failed_log="${failed_log}${ref} | ${install_error_reason}
+"
     else
       log "WARNING: failed to install mod ${mod_id}"
+      failed_log="${failed_log}${ref} | install failed (unknown reason)
+"
     fi
     errors=$((errors + 1))
     continue
@@ -770,6 +782,14 @@ if is_true "${HYTALE_CURSEFORGE_PRUNE}"; then
   done
 
   rm -f "${desired_ids_file}" 2>/dev/null || true
+fi
+
+run_time="$(date '+%Y-%m-%d %H:%M:%S' 2>/dev/null || printf 'unknown')"
+if [ -n "${failed_log}" ]; then
+  { printf '=== %s | %s falha(s) ===\n' "${run_time}" "${errors}"; printf '%s' "${failed_log}"; } > "${failures_file}" 2>/dev/null || true
+  log "CurseForge mods: ${errors} falha(s) registrada(s) em ${failures_file}"
+else
+  printf '=== %s | Sem falhas ===\n' "${run_time}" > "${failures_file}" 2>/dev/null || true
 fi
 
 if [ "${errors}" -gt 0 ] && is_true "${HYTALE_CURSEFORGE_FAIL_ON_ERROR}"; then
