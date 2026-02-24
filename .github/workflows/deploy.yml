@@ -34,11 +34,12 @@ jobs:
 
       - name: Prepare Mod List from Sheets
         id: find_ids
+        env:
+          SHEETS_WEBHOOK_URL: ${{ secrets.SHEETS_WEBHOOK_URL }}
+          SHEETS_TOKEN: ${{ secrets.SHEETS_TOKEN }}
         run: |
-          SHEET_ID="1rEjsYYOipf525D7aophmHDkhFRWRQYdSLlBirOdGVBY"
-          SHEET_GID="1337076826"
           echo "[deploy] Baixando lista de mods do Google Sheets..."
-          curl -sfL "https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SHEET_GID}" | tr -d '\r' > mods.csv
+          curl -sfL "${SHEETS_WEBHOOK_URL}?token=${SHEETS_TOKEN}" | tr -d '\r' > mods.csv
 
           # Lê mods.csv: localiza as colunas "Project ID" e "Habilitado" pelo
           # cabeçalho e filtra linhas onde Habilitado == "Sim".
