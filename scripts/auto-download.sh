@@ -237,41 +237,14 @@ unzip -o "${HYTALE_GAME_ZIP_PATH}" 'Assets.zip' -d "${DATA_DIR}" >/dev/null
 tmp_extract_dir="$(mktemp -d /tmp/hytale-server-extract.XXXXXX 2>/dev/null || mktemp -d)"
 unzip -o "${HYTALE_GAME_ZIP_PATH}" 'Server/*' -d "${tmp_extract_dir}" >/dev/null
 
-HYTALE_PRESERVE_SERVER_FILES="${HYTALE_PRESERVE_SERVER_FILES:-permission.json whitelist.json bans.json config.json}"
-
 if [ -d "${tmp_extract_dir}/Server" ]; then
-  # Backup user-managed files before overwrite
-  _preserve_tmp=""
-  if [ -n "${HYTALE_PRESERVE_SERVER_FILES}" ]; then
-    _preserve_tmp="$(mktemp -d /tmp/hytale-preserve.XXXXXX 2>/dev/null || mktemp -d)"
-    for _pf in ${HYTALE_PRESERVE_SERVER_FILES}; do
-      if [ -f "${SERVER_DIR}/${_pf}" ]; then
-        mkdir -p "${_preserve_tmp}/$(dirname "${_pf}")"
-        cp "${SERVER_DIR}/${_pf}" "${_preserve_tmp}/${_pf}"
-        log "Auto-download: preserving user-managed file: ${_pf}"
-      fi
-    done
-  fi
-
   mkdir -p "${SERVER_DIR}"
   if ! cp -r "${tmp_extract_dir}/Server/." "${SERVER_DIR}/"; then
     log "ERROR: Failed to copy server files to ${SERVER_DIR}/"
     log "ERROR: This usually means the directory has wrong permissions."
     log "ERROR: Fix: ensure ${SERVER_DIR} is owned by UID 1000 (e.g., 'sudo chown -R 1000:1000 ${SERVER_DIR}')"
     log "ERROR: See https://github.com/Hybrowse/hytale-server-docker/blob/main/docs/image/troubleshooting.md"
-    rm -rf "${_preserve_tmp}" 2>/dev/null || true
     exit 1
-  fi
-
-  # Restore preserved files
-  if [ -n "${_preserve_tmp}" ]; then
-    for _pf in ${HYTALE_PRESERVE_SERVER_FILES}; do
-      if [ -f "${_preserve_tmp}/${_pf}" ]; then
-        cp "${_preserve_tmp}/${_pf}" "${SERVER_DIR}/${_pf}"
-        log "Auto-download: restored preserved file: ${_pf}"
-      fi
-    done
-    rm -rf "${_preserve_tmp}" 2>/dev/null || true
   fi
 fi
 
