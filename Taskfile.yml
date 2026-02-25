@@ -1,4 +1,4 @@
-version: '3'
+version: "3"
 
 vars:
   IMAGE_NAME: '{{default "hytale-server:local" .IMAGE_NAME}}'
@@ -9,8 +9,21 @@ vars:
   DEV_BACKUP_FREQUENCY_MINUTES: '{{default "60" .DEV_BACKUP_FREQUENCY_MINUTES}}'
   DEV_BACKUP_MAX_COUNT: '{{default "24" .DEV_BACKUP_MAX_COUNT}}'
   DEV_PORT: '{{default "5520" .DEV_PORT}}'
+  BACKUP_REPO_URL: "{{.BACKUP_REPO_URL}}"
+  GITHUB_TOKEN: "{{.GITHUB_TOKEN}}"
 
 tasks:
+  backup:offsite:
+    desc: Create an offsite backup of sensitive Hytale data to a private repository
+    cmds:
+      - chmod +x scripts/backup-offsite.sh
+      - BACKUP_REPO_URL="{{.BACKUP_REPO_URL}}" GITHUB_TOKEN="{{.GITHUB_TOKEN}}" ./scripts/backup-offsite.sh
+
+  restore:offsite:
+    desc: Restore the latest offsite backup from the private repository
+    cmds:
+      - chmod +x scripts/restore-offsite.sh
+      - BACKUP_REPO_URL="{{.BACKUP_REPO_URL}}" GITHUB_TOKEN="{{.GITHUB_TOKEN}}" ./scripts/restore-offsite.sh
   build:
     desc: Build the Docker image locally
     cmds:

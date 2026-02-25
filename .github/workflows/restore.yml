@@ -1,0 +1,48 @@
+name: Restore from Private Backup
+
+on:
+  workflow_dispatch:
+    inputs:
+      backup_repo_url:
+        description: "URL do repositório de backup (opcional se configurado no Taskfile)"
+        required: false
+      github_token:
+        description: "GitHub Token (PAT) (opcional se configurado no Taskfile)"
+        required: false
+
+jobs:
+  restore:
+    name: Restore Data
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: SSH and Restore
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            cd ~/Paotheon || exit 1
+
+            # Executa o restore via Task (usa inputs do workflow ou tenta carregar do ambiente)
+            # Prioriza os inputs do workflow se fornecidos
+            export BACKUP_REPO_URL="${{ github.event.inputs.backup_repo_url || secrets.BACKUP_REPO_URL }}"
+            export GITHUB_TOKEN="${{ github.event.inputs.github_token || secrets.GITHUB_TOKEN }}"
+
+            if [ -z "$BACKUP_REPO_URL" ] || [ -z "$GITHUB_TOKEN" ]; then
+              echo "ERRO: BACKUP_REPO_URL ou GITHUB_TOKEN não definidos (verifique Secrets ou Inputs)."
+              exit 1
+            fi
+
+            # 1. Para o container para evitar corrupção durante o restore
+            docker compose down
+
+            # 2. Executa o script de restore
+            chmod +x scripts/restore-offsite.sh
+            ./scripts/restore-offsite.sh
+
+            # 3. Sobe o container novamente
+            docker compose up -d
+
+            echo "Restauração concluída com sucesso!"
