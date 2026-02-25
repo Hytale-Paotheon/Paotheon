@@ -36,6 +36,35 @@ services:
 - Backup settings map directly to the server flags (`--backup`, `--backup-dir`, `--backup-frequency`).
 - If `HYTALE_ENABLE_BACKUP=true` and `HYTALE_BACKUP_DIR` is not set, this image defaults the backup directory to `/data/backups`.
 
+## Offsite backups (Private Repository)
+
+For extra safety, you can back up sensitive data (`universe/`, `config.json`) to a private GitHub repository.
+
+### Setup
+
+1. Create a **Private GitHub Repository**.
+2. Generate a **Personal Access Token (PAT)** with `repo` permissions.
+3. Configure environment variables (or pass them to `task`):
+   - `BACKUP_REPO_URL`: The HTTPS URL of your private backup repo.
+   - `GITHUB_TOKEN`: Your Personal Access Token.
+
+### Usage
+
+To perform a backup:
+
+```bash
+task backup:offsite BACKUP_REPO_URL="https://github.com/USER/REPO.git" GITHUB_TOKEN="ghp_xxx"
+```
+
+To restore the latest backup:
+
+```bash
+task restore:offsite BACKUP_REPO_URL="https://github.com/USER/REPO.git" GITHUB_TOKEN="ghp_xxx"
+```
+
+> [!CAUTION]
+> The restore process will replace your current `universe/` directory. It creates a local safety backup as `universe.old_<timestamp>` before overwriting.
+
 ## Related docs
 
 - [`quickstart.md`](quickstart.md)
