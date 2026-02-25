@@ -28,9 +28,6 @@ RUN chmod 0755 /usr/local/bin/hytale-entrypoint /usr/local/bin/hytale-cfg-interp
 RUN mkdir -p /usr/share/hytale
 COPY defaults/server-config.json /usr/share/hytale/default-config.json
 
-RUN mkdir -p /usr/share/licenses/hybrowse-hytale-server
-COPY LICENSE LICENSE-APACHE-2.0 NOTICE LICENSING.md COMMERCIAL_LICENSE.md TRADEMARKS.md /usr/share/licenses/hybrowse-hytale-server/
-
 USER hytale
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10m --retries=3 CMD ["/usr/local/bin/hytale-healthcheck"]
